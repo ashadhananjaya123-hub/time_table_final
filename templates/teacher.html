@@ -1,0 +1,541 @@
+{% extends "base.html" %}
+
+{% block title %}Faculty Dashboard - TimetablePro{% endblock %}
+{% block header_title %}Faculty Instruction & Coordination Portal{% endblock %}
+
+{% block sidebar_nav %}
+<div class="nav-section-label">Teaching Workspace</div>
+<a href="#" class="nav-link-item active" data-section="dashboard" onclick="showBentoSection('dashboard'); return false;">
+    <i data-lucide="layout-grid" style="width: 18px; height: 18px;"></i>
+    <span>Overview</span>
+</a>
+<a href="#" class="nav-link-item" data-section="timetable" onclick="showBentoSection('timetable'); loadTeacherWeeklyTimetable(); return false;">
+    <i data-lucide="calendar" style="width: 18px; height: 18px;"></i>
+    <span>My Timetable</span>
+</a>
+<a href="#" class="nav-link-item" data-section="full-timetable" onclick="showBentoSection('full-timetable'); loadTeacherFullTimetable(); return false;">
+    <i data-lucide="table" style="width: 18px; height: 18px;"></i>
+    <span>Full Timetable</span>
+</a>
+<a href="#" class="nav-link-item" data-section="calendar" onclick="showBentoSection('calendar'); return false;">
+    <i data-lucide="calendar" style="width: 18px; height: 18px;"></i>
+    <span>Personal Calendar</span>
+</a>
+
+<div class="nav-section-label">Coordination</div>
+<a href="#" class="nav-link-item" data-section="swaps" onclick="showBentoSection('swaps'); return false;">
+    <i data-lucide="repeat" style="width: 18px; height: 18px;"></i>
+    <span>Mutual Class Swaps</span>
+</a>
+
+<div class="nav-section-label">Academic Progress</div>
+<a href="#" class="nav-link-item" data-section="syllabus" onclick="showBentoSection('syllabus'); return false;">
+    <i data-lucide="check-square" style="width: 18px; height: 18px;"></i>
+    <span>Syllabus Tracking</span>
+</a>
+<a href="#" class="nav-link-item" data-section="assignments" onclick="showBentoSection('assignments'); return false;">
+    <i data-lucide="file-text" style="width: 18px; height: 18px;"></i>
+    <span>Assignments</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- ======================================================================= -->
+<!-- SECTION: DASHBOARD (Overview)                                           -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-dashboard">
+    <!-- Top Stat Row -->
+    <div class="bento-grid">
+        <div class="bento-card col-span-3">
+            <span class="stat-label">Assigned Weekly Load</span>
+            <div class="stat-value text-primary" id="teacherWeeklyPeriods">0</div>
+            <div class="stat-trend">Periods Across Cohorts</div>
+        </div>
+        <div class="bento-card col-span-3">
+            <span class="stat-label">Today's Lectures</span>
+            <div class="stat-value" id="teacherTodayCount">0</div>
+            <div class="stat-trend" id="teacherTodayDayLabel">Active Classes</div>
+        </div>
+        <div class="bento-card col-span-3">
+            <span class="stat-label">Incoming Swap Requests</span>
+            <div class="stat-value text-warning" id="teacherPendingSwaps">0</div>
+            <div class="stat-trend">Requires Peer Decision</div>
+        </div>
+        <div class="bento-card col-span-3">
+            <span class="stat-label">Curriculum Courses</span>
+            <div class="stat-value" id="teacherSubjectCount">0</div>
+            <div class="stat-trend">Allocated Subjects</div>
+        </div>
+    </div>
+
+    <!-- Second Row: Today's Timeline & Swap Shortcut -->
+    <div class="bento-grid">
+        <div class="bento-card col-span-6">
+            <div class="card-title-row">
+                <h3 class="card-heading">
+                    <i data-lucide="clock" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Today's Chronological Schedule
+                </h3>
+                <span class="card-subtitle" id="teacherTodayDate"></span>
+            </div>
+            <div id="teacherTodayTimeline" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <!-- Populated via JS -->
+            </div>
+        </div>
+
+        <div class="bento-card col-span-6">
+            <div class="card-title-row">
+                <h3 class="card-heading">
+                    <i data-lucide="repeat" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Mutual Class Exchange
+                </h3>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--slate-600); line-height: 1.5;">
+                Need to swap a class period with another instructor? Initiate a mutual exchange proposal. Once both parties agree, the timetable updates automatically.
+            </p>
+            <button class="btn btn-indigo w-100 justify-content-center mb-3" onclick="openModal('modalInitiateSwap')">
+                <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                <span>Propose Mutual Class Swap</span>
+            </button>
+
+            <!-- Campus Notices Preview -->
+            <div class="border rounded p-3 bg-light">
+                <div class="fw-bold text-dark mb-2" style="font-size: 0.825rem;">Latest Campus Notices:</div>
+                <div id="teacherAnnouncementsPreview" style="font-size: 0.775rem;">
+                    Loading notices...
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: MY TIMETABLE (Personal Teaching Routine)                     -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-timetable" style="display: none;">
+    <div class="bento-card mb-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h3 class="card-heading">
+                    <i data-lucide="calendar" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Personal Teaching Schedule (My Classes Only)
+                </h3>
+                <div class="card-subtitle">Aggregated view across all academic departments, semesters, and sections you instruct</div>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-primary" onclick="showBentoSection('full-timetable'); loadTeacherFullTimetable();">
+                    <i data-lucide="table" style="width: 14px; height: 14px;"></i>
+                    <span>Switch to Full Timetable</span>
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="window.print()">
+                    <i data-lucide="printer" style="width: 14px; height: 14px;"></i>
+                    <span>Print Schedule</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="timetable-wrapper" id="teacherTimetableContainer">
+        <!-- Weekly grid rendered via JS -->
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: FULL TIMETABLE (All Classes / Cohorts)                         -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-full-timetable" style="display: none;">
+    <div class="bento-card mb-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <div>
+                <h3 class="card-heading">
+                    <i data-lucide="table" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Departmental & Cohort Master Timetable
+                </h3>
+                <div class="card-subtitle">View complete weekly schedules for any semester & section (your assigned classes are highlighted)</div>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-primary" onclick="showBentoSection('timetable'); loadTeacherWeeklyTimetable();">
+                    <i data-lucide="user-check" style="width: 14px; height: 14px;"></i>
+                    <span>My Classes Only</span>
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="window.print()">
+                    <i data-lucide="printer" style="width: 14px; height: 14px;"></i>
+                    <span>Print Timetable</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter Row -->
+        <div class="row g-2 align-items-end pt-2 border-top">
+            <div class="col-md-3">
+                <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Department</label>
+                <select class="form-select form-select-sm" id="fullTtDept" onchange="loadTeacherFullTimetable()">
+                    <!-- Populated via JS -->
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Semester</label>
+                <select class="form-select form-select-sm" id="fullTtSem" onchange="loadTeacherFullTimetable()">
+                    <option value="1">1st Semester</option>
+                    <option value="3">3rd Semester</option>
+                    <option value="5" selected>5th Semester</option>
+                    <option value="7">7th Semester</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Section</label>
+                <select class="form-select form-select-sm" id="fullTtSection" onchange="loadTeacherFullTimetable()">
+                    <option value="A" selected>Section A</option>
+                    <option value="B">Section B</option>
+                    <option value="C">Section C</option>
+                    <option value="D">Section D</option>
+                    <option value="E">Section E</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-sm btn-indigo w-100" onclick="loadTeacherFullTimetable()">
+                    <i data-lucide="refresh-cw" style="width: 14px; height: 14px;"></i>
+                    <span>Load Routine</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="timetable-wrapper" id="teacherFullTimetableContainer">
+        <!-- Rendered via JS -->
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: PERSONAL CALENDAR                                              -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-calendar" style="display: none;">
+    <div class="bento-card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-heading">
+                    <i data-lucide="calendar" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Personal Instruction Calendar
+                </h3>
+                <div class="card-subtitle">Day, Week, and Month perspectives incorporating regular lectures, labs, approved swaps, and recovery classes</div>
+            </div>
+        </div>
+        <div id="teacherFullCalendar" style="min-height: 650px;"></div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: MUTUAL CLASS SWAPS (Peer-to-Peer Hub)                          -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-swaps" style="display: none;">
+    <div class="bento-card mb-3">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-heading">
+                    <i data-lucide="inbox" style="width: 18px; height: 18px; color: var(--warning);"></i>
+                    Incoming Peer Swap Requests (Action Required)
+                </h3>
+                <div class="card-subtitle">Colleagues requesting to exchange teaching periods with you</div>
+            </div>
+            <button class="btn btn-indigo btn-sm" onclick="openModal('modalInitiateSwap')">
+                <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                <span>Initiate Swap Proposal</span>
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle swap-table-wide" style="font-size: 0.85rem; width: 100%; min-width: 900px;" id="incomingSwapsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th style="min-width: 140px;">Requesting Colleague</th>
+                        <th style="min-width: 160px;">Their Offered Slot</th>
+                        <th style="min-width: 160px;">Your Target Slot</th>
+                        <th style="min-width: 220px;">Stated Reason</th>
+                        <th style="min-width: 100px;">Status</th>
+                        <th class="text-end" style="min-width: 140px;">Decision</th>
+                    </tr>
+                </thead>
+                <tbody id="incomingSwapsTableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Outgoing Proposals -->
+    <div class="bento-card mb-3">
+        <div class="card-title-row">
+            <h3 class="card-heading">
+                <i data-lucide="send" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                My Outgoing Swap Proposals
+            </h3>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle swap-table-wide" style="font-size: 0.85rem; width: 100%; min-width: 900px;" id="outgoingSwapsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th style="min-width: 140px;">Colleague</th>
+                        <th style="min-width: 160px;">My Class</th>
+                        <th style="min-width: 160px;">Requested Class</th>
+                        <th style="min-width: 220px;">Reason</th>
+                        <th style="min-width: 100px;">Status</th>
+                        <th style="min-width: 120px;">Submitted On</th>
+                    </tr>
+                </thead>
+                <tbody id="outgoingSwapsTableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Personal Swap Audit History -->
+    <div class="bento-card">
+        <div class="card-title-row">
+            <h3 class="card-heading">
+                <i data-lucide="history" style="width: 18px; height: 18px; color: var(--success);"></i>
+                Executed Swap History
+            </h3>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle swap-table-wide" style="font-size: 0.825rem; width: 100%; min-width: 850px;" id="teacherSwapHistoryTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date Executed</th>
+                        <th>Colleague Involved</th>
+                        <th>Exchange Record Details</th>
+                    </tr>
+                </thead>
+                <tbody id="teacherSwapHistoryTableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: SYLLABUS PROGRESS TRACKING                                     -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-syllabus" style="display: none;">
+    <div class="bento-card mb-3">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-5">
+                <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Select Teaching Course</label>
+                <select class="form-select form-select-sm" id="syllabusSubjectSelect" onchange="loadSyllabusForSelectedSubject()">
+                    <!-- Populated via JS -->
+                </select>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex align-items-center gap-2 pt-3">
+                    <span style="font-size: 0.85rem; font-weight: 600;">Syllabus Completion:</span>
+                    <div class="progress flex-grow-1" style="height: 8px;">
+                        <div class="progress-bar bg-success" id="syllabusProgressBar" style="width: 0%;"></div>
+                    </div>
+                    <span style="font-weight: 700; font-size: 0.85rem;" id="syllabusProgressPct">0%</span>
+                </div>
+            </div>
+            <div class="col-md-3 text-md-end pt-3">
+                <button class="btn btn-indigo btn-sm" onclick="openModal('modalAddTopic')">
+                    <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                    <span>Add Syllabus Topic</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Topics Table -->
+    <div class="bento-card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" style="font-size: 0.85rem;" id="syllabusTable">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 50px;">Status</th>
+                        <th>Topic / Chapter</th>
+                        <th>Module</th>
+                        <th>Date Taught</th>
+                        <th>Teaching Notes</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="syllabusTableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: ASSIGNMENT MANAGEMENT                                          -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-assignments" style="display: none;">
+    <div class="bento-card mb-3">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-heading">
+                    <i data-lucide="file-text" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Course Assignments & Submission Tracking
+                </h3>
+            </div>
+            <button class="btn btn-indigo btn-sm" onclick="openModal('modalNewAssignment')">
+                <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                <span>Publish Assignment</span>
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" style="font-size: 0.85rem;" id="teacherAssignmentsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Assignment Title</th>
+                        <th>Subject</th>
+                        <th>Issue Date</th>
+                        <th>Due Date</th>
+                        <th>Submissions Recorded</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="teacherAssignmentsTableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- MODALS                                                                  -->
+<!-- ======================================================================= -->
+
+<!-- Modal: Propose Mutual Class Swap -->
+<div class="modal fade" id="modalInitiateSwap" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 920px; width: 92%;">
+        <form class="modal-content" onsubmit="submitSwapProposal(event)">
+            <div class="modal-header">
+                <h5 class="modal-title" style="font-size: 1rem; font-weight: 700;">Initiate Mutual Class Exchange</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <div class="p-3 rounded border bg-light h-100">
+                            <label class="form-label d-block text-primary fw-semibold" style="font-size: 0.8rem; font-weight: 600;">
+                                <i data-lucide="arrow-up-right" style="width: 14px; height: 14px; vertical-align: middle;"></i>
+                                1. Select Your Scheduled Class to Offer *
+                            </label>
+                            <select class="form-select form-select-sm" id="swapSenderSlotSelect" required>
+                                <!-- Populated by JS -->
+                            </select>
+                            <div class="form-text mt-2 text-muted" style="font-size: 0.725rem;">
+                                This class slot will be reassigned to your chosen colleague upon confirmation.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="p-3 rounded border bg-light h-100">
+                            <div class="mb-3">
+                                <label class="form-label d-block text-indigo fw-semibold" style="font-size: 0.8rem; font-weight: 600;">
+                                    <i data-lucide="user-check" style="width: 14px; height: 14px; vertical-align: middle;"></i>
+                                    2. Select Faculty Colleague *
+                                </label>
+                                <select class="form-select form-select-sm" id="swapReceiverTeacherSelect" required onchange="loadReceiverClassesForSwap()">
+                                    <option value="">-- Choose Colleague --</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="form-label d-block text-indigo fw-semibold" style="font-size: 0.8rem; font-weight: 600;">
+                                    <i data-lucide="arrow-down-left" style="width: 14px; height: 14px; vertical-align: middle;"></i>
+                                    3. Select Colleague's Class to Exchange *
+                                </label>
+                                <select class="form-select form-select-sm" id="swapReceiverSlotSelect" required>
+                                    <option value="">-- Select Colleague first --</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Exchange Justification Reason *</label>
+                    <textarea class="form-control form-control-sm" id="swapReasonInput" rows="3" required placeholder="Please provide exact reasoning for the class swap proposal..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-sm btn-indigo">Dispatch Swap Proposal</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Add Syllabus Topic -->
+<div class="modal fade" id="modalAddTopic" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content" onsubmit="saveSyllabusTopicSubmit(event)">
+            <div class="modal-header">
+                <h5 class="modal-title" style="font-size: 1rem; font-weight: 700;">Add Syllabus Topic</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Topic Title *</label>
+                    <input type="text" class="form-control form-control-sm" id="topicTitleInput" required placeholder="e.g. Binary Search Trees & AVL Balancing">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Chapter / Module</label>
+                    <input type="text" class="form-control form-control-sm" id="topicChapterInput" placeholder="Module 4">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Instruction Notes</label>
+                    <textarea class="form-control form-control-sm" id="topicNotesInput" rows="2" placeholder="Sub-topics or reference textbooks..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-sm btn-indigo">Save Topic</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Publish Assignment -->
+<div class="modal fade" id="modalNewAssignment" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content" onsubmit="saveAssignmentSubmit(event)">
+            <div class="modal-header">
+                <h5 class="modal-title" style="font-size: 1rem; font-weight: 700;">Create Course Assignment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Course / Subject *</label>
+                    <select class="form-select form-select-sm" id="asnSubjectSelect" required></select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Assignment Title *</label>
+                    <input type="text" class="form-control form-control-sm" id="asnTitleInput" required placeholder="e.g. Lab Exercise 3: CPU Pipeline Simulator">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Submission Due Date *</label>
+                    <input type="date" class="form-control form-control-sm" id="asnDueDateInput" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Description & Deliverables</label>
+                    <textarea class="form-control form-control-sm" id="asnDescInput" rows="3" placeholder="Specify grading rubric and expected file submissions..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-sm btn-indigo">Publish Assignment</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script src="/static/js/teacher.js"></script>
+{% endblock %}

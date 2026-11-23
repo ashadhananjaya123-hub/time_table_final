@@ -1,0 +1,353 @@
+{% extends "base.html" %}
+
+{% block title %}Student Portal - TimetablePro{% endblock %}
+{% block header_title %}Student Academic Schedule & Routine Portal{% endblock %}
+
+{% block sidebar_nav %}
+<div class="nav-section-label">Academic Portal</div>
+<a href="#" class="nav-link-item active" data-section="dashboard" onclick="showBentoSection('dashboard'); return false;">
+    <i data-lucide="layout-grid" style="width: 18px; height: 18px;"></i>
+    <span>Overview</span>
+</a>
+<a href="#" class="nav-link-item" data-section="timetable" onclick="showBentoSection('timetable'); return false;">
+    <i data-lucide="table" style="width: 18px; height: 18px;"></i>
+    <span>Weekly Timetable</span>
+</a>
+<a href="#" class="nav-link-item" data-section="faculty-search" onclick="showBentoSection('faculty-search'); return false;">
+    <i data-lucide="search" style="width: 18px; height: 18px;"></i>
+    <span>Teacher Directory</span>
+</a>
+<a href="#" class="nav-link-item" data-section="assignments" onclick="showBentoSection('assignments'); return false;">
+    <i data-lucide="file-check" style="width: 18px; height: 18px;"></i>
+    <span>Assignments</span>
+</a>
+<a href="#" class="nav-link-item" data-section="activities" onclick="showBentoSection('activities'); return false;">
+    <i data-lucide="activity" style="width: 18px; height: 18px;"></i>
+    <span>Sports & Activities</span>
+</a>
+<a href="#" class="nav-link-item" data-section="announcements" onclick="showBentoSection('announcements'); return false;">
+    <i data-lucide="megaphone" style="width: 18px; height: 18px;"></i>
+    <span>Campus Notices</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- ======================================================================= -->
+<!-- SECTION: DASHBOARD (Student Overview)                                   -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-dashboard">
+    <!-- Student Cohort Profile Card -->
+    <div class="bento-card mb-3" style="background: linear-gradient(135deg, #ffffff 0%, var(--primary-light) 100%); border-color: var(--primary-border);">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width: 54px; height: 54px; border-radius: 50%; background-color: #ffffff; color: var(--primary); font-size: 1.4rem; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: var(--card-shadow); border: 2px solid var(--primary-border);">
+                    {{ user.name[0] if user and user.name else 'S' }}
+                </div>
+                <div>
+                    <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--slate-900); margin: 0;">{{ user.name }}</h2>
+                    <div style="font-size: 0.85rem; color: var(--slate-600); margin-top: 2px;">
+                        Roll No: <code style="font-weight: 700; color: var(--primary);">{{ user.roll_no or 'N/A' }}</code> |
+                        Email: <span>{{ user.email or 'N/A' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+                <span class="badge-pill primary" id="studentDeptBadge">Department</span>
+                <span class="badge-pill info" id="studentYearSemBadge">Year 1 Sem 1</span>
+                <span class="badge-pill neutral" id="studentSectionBadge">Section A</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Metric Counters -->
+    <div class="bento-grid">
+        <div class="bento-card col-span-4">
+            <span class="stat-label">Today's Class Periods</span>
+            <div class="stat-value text-primary" id="studentTodayClassCount">0</div>
+            <div class="stat-trend" id="studentTodayDayLabel">Scheduled Today</div>
+        </div>
+        <div class="bento-card col-span-4">
+            <span class="stat-label">Registered Curriculum Courses</span>
+            <div class="stat-value text-success" id="studentCourseCount">0</div>
+            <div class="stat-trend">Current Semester</div>
+        </div>
+        <div class="bento-card col-span-4">
+            <span class="stat-label">Active Assignments Due</span>
+            <div class="stat-value text-danger" id="studentPendingAsnCount">0</div>
+            <div class="stat-trend">Pending Submissions</div>
+        </div>
+    </div>
+
+    <!-- Today's Routine Timeline & Next Class Highlight -->
+    <div class="bento-grid">
+        <div class="bento-card col-span-7">
+            <div class="card-title-row">
+                <h3 class="card-heading">
+                    <i data-lucide="clock" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Today's Academic Sequence
+                </h3>
+                <span class="card-subtitle" id="studentTodayDateFormatted"></span>
+            </div>
+            <div id="studentTodayTimeline" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <!-- Populated via JS -->
+            </div>
+        </div>
+
+        <div class="bento-card col-span-5">
+            <div class="card-title-row">
+                <h3 class="card-heading">
+                    <i data-lucide="compass" style="width: 18px; height: 18px; color: var(--info);"></i>
+                    Next Immediate Class
+                </h3>
+            </div>
+            <div id="studentNextClassCard" class="p-3 rounded border bg-light mb-3">
+                <div class="text-muted" style="font-size: 0.825rem;">Checking current schedule...</div>
+            </div>
+
+            <!-- Quick Action Shortcuts -->
+            <div class="d-flex flex-column gap-2">
+                <button class="btn btn-outline-indigo w-100 justify-content-between" onclick="showBentoSection('timetable')">
+                    <span class="d-flex align-items-center gap-2">
+                        <i data-lucide="table" style="width: 16px; height: 16px;"></i>
+                        <span>View Full Master Timetable</span>
+                    </span>
+                    <i data-lucide="chevron-right" style="width: 16px; height: 16px;"></i>
+                </button>
+                <button class="btn btn-outline-indigo w-100 justify-content-between" onclick="showBentoSection('faculty-search')">
+                    <span class="d-flex align-items-center gap-2">
+                        <i data-lucide="search" style="width: 16px; height: 16px;"></i>
+                        <span>Search Faculty Directory</span>
+                    </span>
+                    <i data-lucide="chevron-right" style="width: 16px; height: 16px;"></i>
+                </button>
+                <button class="btn btn-outline-indigo w-100 justify-content-between" onclick="showBentoSection('assignments')">
+                    <span class="d-flex align-items-center gap-2">
+                        <i data-lucide="file-check" style="width: 16px; height: 16px;"></i>
+                        <span>Check Course Assignments</span>
+                    </span>
+                    <i data-lucide="chevron-right" style="width: 16px; height: 16px;"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: WEEKLY MASTER TIMETABLE                                        -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-timetable" style="display: none;">
+    <div class="bento-card mb-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h3 class="card-heading">
+                    <i data-lucide="table" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Official Weekly Class Timetable
+                </h3>
+                <div class="card-subtitle">Monday to Saturday official schedule for your registered cohort</div>
+            </div>
+            <button class="btn btn-sm btn-indigo" onclick="window.print()">
+                <i data-lucide="printer" style="width: 14px; height: 14px;"></i>
+                <span>Print Timetable</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Student Timetable Grid -->
+    <div class="timetable-wrapper" id="studentTimetableContainer">
+        <!-- Rendered via JS -->
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: FACULTY DIRECTORY & SEARCH FOR STUDENTS                        -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-faculty-search" style="display: none;">
+    <div class="bento-card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-heading">
+                    <i data-lucide="search" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Faculty Directory & Teacher Routine Lookup
+                </h3>
+                <div class="card-subtitle">Search professors by name or department to view contact information and lecture hours</div>
+            </div>
+        </div>
+
+        <div class="row g-2 mb-3">
+            <div class="col-md-7">
+                <input type="text" class="form-control form-control-sm" id="studentSearchTeacherInput" placeholder="Search instructor by name..." oninput="filterStudentTeachers()">
+            </div>
+            <div class="col-md-5">
+                <select class="form-select form-select-sm" id="studentFilterTeacherDept" onchange="filterStudentTeachers()">
+                    <option value="all">All Academic Departments</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" style="font-size: 0.85rem;" id="studentTeachersTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Faculty Name</th>
+                        <th>Department</th>
+                        <th>Email Address</th>
+                        <th>Office Phone</th>
+                        <th>Assigned Courses</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="studentTeachersTableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: ASSIGNMENTS & SUBMISSION TRACKING                              -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-assignments" style="display: none;">
+    <div class="bento-card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-heading">
+                    <i data-lucide="file-check" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Coursework Assignments & Due Dates
+                </h3>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" style="font-size: 0.85rem;" id="studentAssignmentsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Assignment</th>
+                        <th>Course</th>
+                        <th>Instructor</th>
+                        <th>Due Date</th>
+                        <th>Your Status</th>
+                        <th class="text-end">Submission Action</th>
+                    </tr>
+                </thead>
+                <tbody id="studentAssignmentsTableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: SPORTS, CULTURAL & EVENTS                                      -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-activities" style="display: none;">
+    <div class="bento-card mb-3">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-heading">
+                    <i data-lucide="activity" style="width: 18px; height: 18px; color: var(--success);"></i>
+                    Sports, Cultural & Club Activity Schedule
+                </h3>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" style="font-size: 0.85rem;" id="studentActivitiesTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Activity Title</th>
+                        <th>Type</th>
+                        <th>Day & Period</th>
+                        <th>Campus Venue</th>
+                        <th>Coordinator</th>
+                    </tr>
+                </thead>
+                <tbody id="studentActivitiesTableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: CAMPUS NOTICES                                                 -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-announcements" style="display: none;">
+    <div class="bento-card">
+        <div class="card-title-row">
+            <h3 class="card-heading">
+                <i data-lucide="megaphone" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                Institutional Announcements
+            </h3>
+        </div>
+
+        <div id="studentAnnouncementsFullList" style="display: flex; flex-direction: column; gap: 0.85rem;">
+            <!-- Populated via JS -->
+        </div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- MODALS                                                                  -->
+<!-- ======================================================================= -->
+
+<!-- Modal: View Teacher Schedule -->
+<div class="modal fade" id="modalViewTeacherSchedule" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="teacherScheduleModalTitle" style="font-size: 1rem; font-weight: 700;">Faculty Schedule</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered text-center align-middle" style="font-size: 0.78rem;" id="modalTeacherScheduleTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Day</th>
+                                <th>Period 1</th><th>Period 2</th><th>Period 3</th><th>Period 4</th>
+                                <th>Period 5</th><th>Period 6</th><th>Period 7</th><th>Period 8</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalTeacherScheduleTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Submit Assignment Notes -->
+<div class="modal fade" id="modalSubmitAssignment" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content" onsubmit="executeAssignmentSubmission(event)">
+            <div class="modal-header">
+                <h5 class="modal-title" style="font-size: 1rem; font-weight: 700;">Submit Course Assignment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="submitAsnId">
+                <p id="submitAsnTitle" class="fw-bold mb-2"></p>
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Submission Notes / Link *</label>
+                    <textarea class="form-control form-control-sm" id="submitAsnNotes" rows="3" required placeholder="Paste repository URL, drive link, or completion notes..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-sm btn-indigo">Confirm Submission</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script src="/static/js/student.js"></script>
+{% endblock %}

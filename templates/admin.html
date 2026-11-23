@@ -1,0 +1,1538 @@
+{% extends "base.html" %}
+
+{% block title %}Administrator Dashboard - TimetablePro{% endblock %}
+{% block header_title %}Administrator Control Center{% endblock %}
+
+{% block sidebar_nav %}
+<div class="nav-section-label">Core Overview</div>
+<a href="#" class="nav-link-item active" data-section="dashboard" onclick="showBentoSection('dashboard'); return false;">
+    <i data-lucide="layout-grid" style="width: 18px; height: 18px;"></i>
+    <span>Overview</span>
+</a>
+<a href="#" class="nav-link-item" data-section="timetables" onclick="showBentoSection('timetables'); return false;">
+    <i data-lucide="table" style="width: 18px; height: 18px;"></i>
+    <span>Timetables</span>
+</a>
+<a href="#" class="nav-link-item" data-section="analytics" onclick="showBentoSection('analytics'); return false;">
+    <i data-lucide="bar-chart-3" style="width: 18px; height: 18px;"></i>
+    <span>Faculty Workload</span>
+</a>
+<a href="#" class="nav-link-item" data-section="calendar" onclick="showBentoSection('calendar'); return false;">
+    <i data-lucide="calendar" style="width: 18px; height: 18px;"></i>
+    <span>Master Calendar</span>
+</a>
+
+<div class="nav-section-label">Academic Management</div>
+<a href="#" class="nav-link-item" data-section="faculty" onclick="showBentoSection('faculty'); return false;">
+    <i data-lucide="users" style="width: 18px; height: 18px;"></i>
+    <span>Faculty Directory</span>
+</a>
+<a href="#" class="nav-link-item" data-section="students" onclick="showBentoSection('students'); return false;">
+    <i data-lucide="graduation-cap" style="width: 18px; height: 18px;"></i>
+    <span>Student Records</span>
+</a>
+<a href="#" class="nav-link-item" data-section="curriculum" onclick="showBentoSection('curriculum'); return false;">
+    <i data-lucide="book-open" style="width: 18px; height: 18px;"></i>
+    <span>Subjects & Courses</span>
+</a>
+<a href="#" class="nav-link-item" data-section="facilities" onclick="showBentoSection('facilities'); return false;">
+    <i data-lucide="building-2" style="width: 18px; height: 18px;"></i>
+    <span>Classrooms & Labs</span>
+</a>
+<a href="#" class="nav-link-item" data-section="departments" onclick="showBentoSection('departments'); return false;">
+    <i data-lucide="layers" style="width: 18px; height: 18px;"></i>
+    <span>Departments</span>
+</a>
+
+<div class="nav-section-label">Operations & Recovery</div>
+<a href="#" class="nav-link-item" data-section="swaps" onclick="showBentoSection('swaps'); return false;">
+    <i data-lucide="repeat" style="width: 18px; height: 18px;"></i>
+    <span>Teacher Swaps</span>
+</a>
+<a href="#" class="nav-link-item" data-section="events" onclick="showBentoSection('events'); return false;">
+    <i data-lucide="clock-alert" style="width: 18px; height: 18px;"></i>
+    <span>Events & Lost Class</span>
+</a>
+<a href="#" class="nav-link-item" data-section="activities" onclick="showBentoSection('activities'); return false;">
+    <i data-lucide="activity" style="width: 18px; height: 18px;"></i>
+    <span>Activity Periods</span>
+</a>
+<a href="#" class="nav-link-item" data-section="announcements" onclick="showBentoSection('announcements'); return false;">
+    <i data-lucide="megaphone" style="width: 18px; height: 18px;"></i>
+    <span>Announcements</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- ======================================================================= -->
+<!-- SECTION: DASHBOARD (Bento Grid Overview)                                -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-dashboard">
+    <!-- Top Bento Metric Cards -->
+    <div class="bento-grid">
+        <div class="bento-card col-span-3">
+            <div class="stat-card-inner">
+                <div>
+                    <span class="stat-label">Total Faculty</span>
+                    <div class="stat-value" id="statFacultyCount">0</div>
+                    <div class="stat-trend">
+                        <span class="badge-pill success">Active Directory</span>
+                    </div>
+                </div>
+                <div class="stat-icon-wrap">
+                    <i data-lucide="users" style="width: 22px; height: 22px;"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bento-card col-span-3">
+            <div class="stat-card-inner">
+                <div>
+                    <span class="stat-label">Enrolled Students</span>
+                    <div class="stat-value" id="statStudentCount">0</div>
+                    <div class="stat-trend">
+                        <span class="badge-pill info">All Cohorts</span>
+                    </div>
+                </div>
+                <div class="stat-icon-wrap info">
+                    <i data-lucide="graduation-cap" style="width: 22px; height: 22px;"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bento-card col-span-3">
+            <div class="stat-card-inner">
+                <div>
+                    <span class="stat-label">Live Timetables</span>
+                    <div class="stat-value" id="statTimetablesCount">0</div>
+                    <div class="stat-trend">
+                        <span class="badge-pill success">Published</span>
+                    </div>
+                </div>
+                <div class="stat-icon-wrap success">
+                    <i data-lucide="table" style="width: 22px; height: 22px;"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bento-card col-span-3">
+            <div class="stat-card-inner">
+                <div>
+                    <span class="stat-label">Pending Swaps</span>
+                    <div class="stat-value" id="statPendingSwaps">0</div>
+                    <div class="stat-trend">
+                        <span class="badge-pill warning">Mutual Peer Queue</span>
+                    </div>
+                </div>
+                <div class="stat-icon-wrap warning">
+                    <i data-lucide="repeat" style="width: 22px; height: 22px;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secondary Bento Row: Quick Generation & Workload Summary -->
+    <div class="bento-grid">
+        <div class="bento-card col-span-8">
+            <div class="card-title-row">
+                <div>
+                    <h3 class="card-heading">
+                        <i data-lucide="bar-chart" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                        Faculty Workload & Utilization Glance
+                    </h3>
+                    <div class="card-subtitle">Assigned weekly teaching periods per instructor vs institutional capacity</div>
+                </div>
+                <button class="btn btn-sm btn-outline-indigo" onclick="showBentoSection('analytics')">
+                    Full Analytics
+                </button>
+            </div>
+            <div style="height: 250px; position: relative;">
+                <canvas id="overviewWorkloadChart"></canvas>
+            </div>
+        </div>
+
+        <div class="bento-card col-span-4">
+            <div class="card-title-row">
+                <div>
+                    <h3 class="card-heading">
+                        <i data-lucide="zap" style="width: 18px; height: 18px; color: var(--warning);"></i>
+                        Timetable Automation
+                    </h3>
+                    <div class="card-subtitle">Fast generation shortcut</div>
+                </div>
+            </div>
+            
+            <form onsubmit="handleQuickGenerate(event)">
+                <div class="mb-2">
+                    <label class="form-label" style="font-size: 0.78rem; font-weight: 600;">Department</label>
+                    <select class="form-select form-select-sm" id="quickDeptSelect" required>
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.78rem; font-weight: 600;">Year</label>
+                        <select class="form-select form-select-sm" id="quickYearSelect" required>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.78rem; font-weight: 600;">Semester</label>
+                        <select class="form-select form-select-sm" id="quickSemSelect" required>
+                            <option value="1">Semester 1</option>
+                            <option value="2">Semester 2</option>
+                            <option value="3">Semester 3</option>
+                            <option value="4">Semester 4</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-indigo w-100 justify-content-center" id="btnQuickGen">
+                    <i data-lucide="play" style="width: 16px; height: 16px;"></i>
+                    <span>Generate Non-Conflicting Schedule</span>
+                </button>
+            </form>
+
+            <div class="mt-3 p-2 rounded" style="background-color: var(--slate-50); border: 1px solid var(--slate-200); font-size: 0.75rem; color: var(--slate-600);">
+                <div class="d-flex align-items-center gap-1 fw-bold text-slate-800 mb-1">
+                    <i data-lucide="shield-check" style="width: 14px; height: 14px; color: var(--success);"></i>
+                    Constraint Engine Guarantee:
+                </div>
+                Zero teacher double-booking, protected laboratory blocks, and preserved activity periods.
+            </div>
+        </div>
+    </div>
+
+    <!-- Third Bento Row: Recent Swaps & Activity Log -->
+    <div class="bento-grid">
+        <div class="bento-card col-span-6">
+            <div class="card-title-row">
+                <h3 class="card-heading">
+                    <i data-lucide="history" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Recent Mutual Teacher Swaps
+                </h3>
+                <span class="badge-pill neutral" id="swapAuditCountBadge">Live Feed</span>
+            </div>
+            <div id="dashboardRecentSwapsList" style="display: flex; flex-direction: column; gap: 0.6rem;">
+                <!-- Populated via JS -->
+            </div>
+        </div>
+
+        <div class="bento-card col-span-6">
+            <div class="card-title-row">
+                <h3 class="card-heading">
+                    <i data-lucide="megaphone" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Campus Announcements & Notices
+                </h3>
+                <button class="btn btn-sm btn-outline-indigo" onclick="openModal('modalNewAnnouncement')">
+                    <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                    <span>New Notice</span>
+                </button>
+            </div>
+            <div id="dashboardRecentAnnouncementsList" style="display: flex; flex-direction: column; gap: 0.6rem;">
+                <!-- Populated via JS -->
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: TIMETABLES (View, Generate, Slot Editor, Publish)              -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-timetables" style="display: none;">
+    <div class="bento-card mb-3">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Department</label>
+                <select class="form-select form-select-sm" id="ttFilterDept" onchange="loadSelectedTimetable()">
+                    <!-- Populated via JS -->
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Year</label>
+                <select class="form-select form-select-sm" id="ttFilterYear" onchange="loadSelectedTimetable()">
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Semester</label>
+                <select class="form-select form-select-sm" id="ttFilterSem" onchange="loadSelectedTimetable()">
+                    <option value="1">Semester 1</option>
+                    <option value="2">Semester 2</option>
+                    <option value="3">Semester 3</option>
+                    <option value="4">Semester 4</option>
+                </select>
+            </div>
+            <div class="col-md-5 d-flex gap-2 justify-content-md-end flex-wrap">
+                <button class="btn btn-indigo btn-sm" id="btnTriggerGenerate" onclick="generateCurrentTimetable()">
+                    <i data-lucide="sparkles" style="width: 14px; height: 14px;"></i>
+                    <span>Generate Schedule</span>
+                </button>
+                <button class="btn btn-sm btn-success" id="btnPublishTT" onclick="publishActiveTimetable()" style="display: none;">
+                    <i data-lucide="globe" style="width: 14px; height: 14px;"></i>
+                    <span>Publish</span>
+                </button>
+                <button class="btn btn-sm btn-warning" id="btnUnpublishTT" onclick="unpublishActiveTimetable()" style="display: none;">
+                    <i data-lucide="eye-off" style="width: 14px; height: 14px;"></i>
+                    <span>Unpublish</span>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" id="btnDeleteTT" onclick="deleteActiveTimetable()" style="display: none;">
+                    <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="window.print()">
+                    <i data-lucide="printer" style="width: 14px; height: 14px;"></i>
+                    <span>Print</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timetable Status Banner -->
+    <div id="timetableStatusBanner" class="mb-3"></div>
+
+    <!-- Weekly Grid View -->
+    <div class="timetable-wrapper" id="adminTimetableDisplay">
+        <div style="padding: 3rem; text-align: center; color: var(--slate-400);">
+            Select Department, Year, and Semester to view or generate schedule.
+        </div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: FACULTY WORKLOAD & UTILIZATION ANALYTICS                        -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-analytics" style="display: none;">
+    <!-- Filter Row -->
+    <div class="bento-card mb-3">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-4">
+                <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Filter by Department</label>
+                <select class="form-select form-select-sm" id="analyticsDeptFilter" onchange="loadAnalyticsData()">
+                    <option value="all">All Academic Departments</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Filter by Instructor</label>
+                <select class="form-select form-select-sm" id="analyticsTeacherFilter" onchange="loadAnalyticsData()">
+                    <option value="all">All Faculty Members</option>
+                </select>
+            </div>
+            <div class="col-md-4 text-md-end pt-3">
+                <span class="badge-pill primary" id="analyticsAvgUtilBadge">Average Utilization: 0%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="bento-grid">
+        <div class="bento-card col-span-8">
+            <div class="card-title-row">
+                <h3 class="card-heading">
+                    <i data-lucide="bar-chart-2" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Instructor Teaching Load Comparison
+                </h3>
+                <span class="card-subtitle">Assigned Periods vs 48 Weekly Teaching Hours</span>
+            </div>
+            <div style="height: 320px; position: relative;">
+                <canvas id="facultyBarChart"></canvas>
+            </div>
+        </div>
+
+        <div class="bento-card col-span-4">
+            <div class="card-title-row">
+                <h3 class="card-heading">
+                    <i data-lucide="pie-chart" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Department Distribution
+                </h3>
+            </div>
+            <div style="height: 320px; position: relative;">
+                <canvas id="deptDoughnutChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Utilization Table -->
+    <div class="bento-card">
+        <div class="card-title-row">
+            <h3 class="card-heading">
+                <i data-lucide="sliders" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                Faculty Utilization Matrix
+            </h3>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" style="font-size: 0.85rem;" id="utilizationMatrixTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Instructor</th>
+                        <th>Department</th>
+                        <th>Assigned Teaching Periods</th>
+                        <th>Available Periods</th>
+                        <th>Utilization Rate</th>
+                        <th>Workload Status</th>
+                    </tr>
+                </thead>
+                <tbody id="utilizationMatrixTableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: MASTER ACADEMIC CALENDAR                                       -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-calendar" style="display: none;">
+    <div class="bento-card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-heading">
+                    <i data-lucide="calendar" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Institutional Master Calendar
+                </h3>
+                <div class="card-subtitle">Day, Week, and Month perspectives incorporating regular classes, workshops, holidays & recovery periods</div>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-indigo" onclick="openModal('modalNewEvent')">
+                    <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                    <span>Add Event / Workshop</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Master Calendar Declutter Toolbar -->
+        <div class="p-3 bg-light rounded-3 mb-3 border">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-3">
+                    <label class="form-label mb-1" style="font-size: 0.75rem; font-weight: 600; color: var(--slate-600);">Calendar Perspective</label>
+                    <select class="form-select form-select-sm" id="calFilterType" onchange="refreshAdminCalendar()">
+                        <option value="institutional" selected>Institutional & Events Only (Decluttered)</option>
+                        <option value="classes">Regular Classes & Labs Only</option>
+                        <option value="recovery">Extra Recovery Classes Only</option>
+                        <option value="all">All Items (Full Institution)</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label mb-1" style="font-size: 0.75rem; font-weight: 600; color: var(--slate-600);">Department Filter</label>
+                    <select class="form-select form-select-sm" id="calFilterDept" onchange="refreshAdminCalendar()">
+                        <option value="all">All Departments</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label mb-1" style="font-size: 0.75rem; font-weight: 600; color: var(--slate-600);">Cohort / Semester</label>
+                    <select class="form-select form-select-sm" id="calFilterCohort" onchange="refreshAdminCalendar()">
+                        <option value="all">All Semesters & Sections</option>
+                        <option value="3_A">Semester 3 - Sec A</option>
+                        <option value="3_B">Semester 3 - Sec B</option>
+                        <option value="5_A">Semester 5 - Sec A</option>
+                        <option value="5_B">Semester 5 - Sec B</option>
+                        <option value="7_A">Semester 7 - Sec A</option>
+                        <option value="7_B">Semester 7 - Sec B</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end gap-2 pt-3">
+                    <button class="btn btn-sm btn-indigo flex-grow-1" onclick="refreshAdminCalendar()">
+                        <i data-lucide="filter" style="width: 14px; height: 14px;"></i> Filter
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="resetCalendarFilter()" title="Reset Filters">
+                        <i data-lucide="rotate-ccw" style="width: 14px; height: 14px;"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-flex gap-3 flex-wrap mb-3 p-2 bg-light rounded" style="font-size: 0.75rem;">
+            <div class="d-flex align-items-center gap-1"><span style="width:12px;height:12px;background:#4f46e5;border-radius:2px;display:inline-block;"></span> Regular Theory Class</div>
+            <div class="d-flex align-items-center gap-1"><span style="width:12px;height:12px;background:#059669;border-radius:2px;display:inline-block;"></span> Laboratory Session</div>
+            <div class="d-flex align-items-center gap-1"><span style="width:12px;height:12px;background:#d97706;border-radius:2px;display:inline-block;"></span> Workshop / Seminar</div>
+            <div class="d-flex align-items-center gap-1"><span style="width:12px;height:12px;background:#dc2626;border-radius:2px;display:inline-block;"></span> Academic Holiday</div>
+            <div class="d-flex align-items-center gap-1"><span style="width:12px;height:12px;background:#7c3aed;border-radius:2px;display:inline-block;"></span> Extra Recovery Class</div>
+        </div>
+
+        <div id="adminFullCalendar" style="min-height: 650px;"></div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: FACULTY DIRECTORY                                              -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-faculty" style="display: none;">
+    <div class="bento-card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-heading">
+                    <i data-lucide="users" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Faculty Directory
+                </h3>
+                <div class="card-subtitle">Manage university instructors, subject allocations, teaching routines, and departmental roles</div>
+            </div>
+            <button class="btn btn-indigo btn-sm" onclick="openModal('modalAddTeacher')">
+                <i data-lucide="user-plus" style="width: 14px; height: 14px;"></i>
+                <span>Add Faculty Member</span>
+            </button>
+        </div>
+
+        <div class="row g-2 mb-3">
+            <div class="col-md-6">
+                <input type="text" class="form-control form-control-sm" id="searchTeacherInput" placeholder="Search faculty by name, email or code..." oninput="filterTeachersTable()">
+            </div>
+            <div class="col-md-4">
+                <select class="form-select form-select-sm" id="filterTeacherDept" onchange="filterTeachersTable()">
+                    <option value="all">All Departments</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" style="font-size: 0.85rem;" id="teachersTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Faculty Name</th>
+                        <th>Username</th>
+                        <th>Email & Contact</th>
+                        <th>Department</th>
+                        <th>Classes Taken</th>
+                        <th>Weekly Load</th>
+                        <th class="text-end">Actions / Schedule</th>
+                    </tr>
+                </thead>
+                <tbody id="teachersTableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: STUDENT RECORDS                                                -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-students" style="display: none;">
+    <div class="bento-card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-heading">
+                    <i data-lucide="graduation-cap" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Student Directory & Cohort Management
+                </h3>
+                <div class="card-subtitle">Enrolled students filtered by academic department, year, semester, and section</div>
+            </div>
+            <button class="btn btn-indigo btn-sm" onclick="openModal('modalAddStudent')">
+                <i data-lucide="user-plus" style="width: 14px; height: 14px;"></i>
+                <span>Register Student</span>
+            </button>
+        </div>
+
+        <div class="row g-2 mb-3">
+            <div class="col-md-4">
+                <input type="text" class="form-control form-control-sm" id="searchStudentInput" placeholder="Search by name or roll number..." oninput="filterStudentsTable()">
+            </div>
+            <div class="col-md-3">
+                <select class="form-select form-select-sm" id="filterStudentDept" onchange="filterStudentsTable()">
+                    <option value="all">All Departments</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select form-select-sm" id="filterStudentYear" onchange="filterStudentsTable()">
+                    <option value="all">All Years</option>
+                    <option value="1">Year 1</option>
+                    <option value="2">Year 2</option>
+                    <option value="3">Year 3</option>
+                    <option value="4">Year 4</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select form-select-sm" id="filterStudentSem" onchange="filterStudentsTable()">
+                    <option value="all">All Semesters</option>
+                    <option value="1">Sem 1</option>
+                    <option value="2">Sem 2</option>
+                    <option value="3">Sem 3</option>
+                    <option value="4">Sem 4</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" style="font-size: 0.85rem;" id="studentsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Roll Number</th>
+                        <th>Student Name</th>
+                        <th>Username</th>
+                        <th>Department</th>
+                        <th>Year & Semester</th>
+                        <th>Section</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: SUBJECTS & CURRICULUM                                          -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-curriculum" style="display: none;">
+    <div class="bento-card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-heading">
+                    <i data-lucide="book-open" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Curriculum Subjects & Course Allocations
+                </h3>
+                <div class="card-subtitle">Manage theory and laboratory credit hours, semester allocations, and faculty assignments</div>
+            </div>
+            <button class="btn btn-indigo btn-sm" onclick="openModal('modalAddSubject')">
+                <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                <span>Add Curriculum Subject</span>
+            </button>
+        </div>
+
+        <div class="row g-2 mb-3">
+            <div class="col-md-5">
+                <input type="text" class="form-control form-control-sm" id="searchSubjectInput" placeholder="Search subjects by name, code or instructor..." oninput="filterSubjectsTable()">
+            </div>
+            <div class="col-md-3">
+                <select class="form-select form-select-sm" id="filterSubjectDept" onchange="filterSubjectsTable()">
+                    <option value="all">All Departments</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select form-select-sm" id="filterSubjectSem" onchange="filterSubjectsTable()">
+                    <option value="all">All Semesters</option>
+                    <option value="1">Sem 1</option>
+                    <option value="2">Sem 2</option>
+                    <option value="3">Sem 3</option>
+                    <option value="4">Sem 4</option>
+                    <option value="5">Sem 5</option>
+                    <option value="6">Sem 6</option>
+                    <option value="7">Sem 7</option>
+                    <option value="8">Sem 8</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select form-select-sm" id="filterSubjectType" onchange="filterSubjectsTable()">
+                    <option value="all">All Types</option>
+                    <option value="theory">Theory Only</option>
+                    <option value="lab">Laboratory Only</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" style="font-size: 0.85rem;" id="subjectsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Subject Name</th>
+                        <th>Code</th>
+                        <th>Department</th>
+                        <th>Year / Sem</th>
+                        <th>Type</th>
+                        <th>Hours/Wk</th>
+                        <th>Assigned Faculty</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="subjectsTableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: FACILITIES (Classrooms & Labs)                                 -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-facilities" style="display: none;">
+    <div class="bento-card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-heading">
+                    <i data-lucide="building-2" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Campus Classrooms & Specialized Laboratories
+                </h3>
+                <div class="card-subtitle">Facility capacities and physical block locations</div>
+            </div>
+            <button class="btn btn-indigo btn-sm" onclick="openModal('modalAddClassroom')">
+                <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                <span>Add Classroom / Lab</span>
+            </button>
+        </div>
+
+        <div class="row g-2 mb-3">
+            <div class="col-md-7">
+                <input type="text" class="form-control form-control-sm" id="searchFacilityInput" placeholder="Search facility by name, room or building..." oninput="filterFacilitiesTable()">
+            </div>
+            <div class="col-md-5">
+                <select class="form-select form-select-sm" id="filterFacilityType" onchange="filterFacilitiesTable()">
+                    <option value="all">All Facility Types</option>
+                    <option value="classroom">Lecture Halls & Classrooms</option>
+                    <option value="lab">Specialized Laboratories</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" style="font-size: 0.85rem;" id="facilitiesTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Facility Name</th>
+                        <th>Type</th>
+                        <th>Seating Capacity</th>
+                        <th>Building / Wing</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="facilitiesTableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: DEPARTMENTS                                                    -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-departments" style="display: none;">
+    <div class="bento-card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-heading">
+                    <i data-lucide="layers" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Academic Departments
+                </h3>
+                <div class="card-subtitle">Manage faculty programs, subject mappings, and student enrollments</div>
+            </div>
+            <button class="btn btn-indigo btn-sm" onclick="openModal('modalAddDepartment')">
+                <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                <span>Add Department</span>
+            </button>
+        </div>
+
+        <div class="row g-2 mb-3">
+            <div class="col-md-6">
+                <input type="text" class="form-control form-control-sm" id="searchDeptInput" placeholder="Search departments by name or code..." oninput="filterDepartmentsTable()">
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" style="font-size: 0.85rem;" id="departmentsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Department Name</th>
+                        <th>Code</th>
+                        <th>Faculty Count</th>
+                        <th>Curriculum Subjects</th>
+                        <th>Registered Students</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="departmentsTableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: TEACHER-TO-TEACHER SWAPS (History & Audit Log)                 -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-swaps" style="display: none;">
+    <div class="bento-card mb-3">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-heading">
+                    <i data-lucide="repeat" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Mutual Faculty Class Swapping Center
+                </h3>
+                <div class="card-subtitle">Real-time status of peer-to-peer exchanges and automated timetable commitments</div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle swap-table-wide" style="font-size: 0.85rem; width: 100%; min-width: 950px;" id="adminSwapsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th style="min-width: 140px;">Initiator Faculty</th>
+                        <th style="min-width: 140px;">Recipient Faculty</th>
+                        <th style="min-width: 150px;">Sender Class</th>
+                        <th style="min-width: 150px;">Recipient Class</th>
+                        <th style="min-width: 220px;">Stated Justification</th>
+                        <th style="min-width: 110px;">Mutual Status</th>
+                        <th style="min-width: 130px;">Submitted At</th>
+                    </tr>
+                </thead>
+                <tbody id="adminSwapsTableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Immutable Audit History -->
+    <div class="bento-card">
+        <div class="card-title-row">
+            <h3 class="card-heading">
+                <i data-lucide="file-check-2" style="width: 18px; height: 18px; color: var(--success);"></i>
+                Immutable Swap Audit Trail
+            </h3>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle swap-table-wide" style="font-size: 0.825rem; width: 100%; min-width: 850px;" id="swapHistoryTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Faculty A</th>
+                        <th>Faculty B</th>
+                        <th>Execution Details</th>
+                    </tr>
+                </thead>
+                <tbody id="swapHistoryTableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: EVENTS, WORKSHOPS & LOST-CLASS RECOVERY                        -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-events" style="display: none;">
+    <!-- Lost Class Recovery Metrics Banner -->
+    <div class="bento-grid">
+        <div class="bento-card col-span-3">
+            <span class="stat-label">Total Teaching Periods Lost</span>
+            <div class="stat-value text-danger" id="metricLostClasses">0</div>
+            <div class="stat-trend">Academic Events & Workshops</div>
+        </div>
+        <div class="bento-card col-span-3">
+            <span class="stat-label">Replacement Scheduled</span>
+            <div class="stat-value text-primary" id="metricScheduledRecovery">0</div>
+            <div class="stat-trend">Extra Teaching Hours</div>
+        </div>
+        <div class="bento-card col-span-3">
+            <span class="stat-label">Replacement Completed</span>
+            <div class="stat-value text-success" id="metricCompletedRecovery">0</div>
+            <div class="stat-trend">Verified Completed</div>
+        </div>
+        <div class="bento-card col-span-3">
+            <span class="stat-label">Remaining to Recover</span>
+            <div class="stat-value text-warning" id="metricRemainingRecovery">0</div>
+            <div class="stat-trend">Pending Allocations</div>
+        </div>
+    </div>
+
+    <div class="bento-card mb-3">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-heading">
+                    <i data-lucide="clock-alert" style="width: 18px; height: 18px; color: var(--danger);"></i>
+                    Academic Events & Workshops (Class Disruptions)
+                </h3>
+            </div>
+            <button class="btn btn-indigo btn-sm" onclick="openModal('modalNewEvent')">
+                <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                <span>Log New Event / Workshop</span>
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" style="font-size: 0.85rem;" id="eventsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Event Title</th>
+                        <th>Type</th>
+                        <th>Date & Time</th>
+                        <th>Affected Cohort</th>
+                        <th>Periods Lost</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="eventsTableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Extra Class Allocation Table -->
+    <div class="bento-card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-heading">
+                    <i data-lucide="calendar-plus" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Extra Teaching-Hour Allocations (Lost-Class Recovery)
+                </h3>
+                <div class="card-subtitle">Conflict-checked replacement classes scheduled on replacement dates</div>
+            </div>
+            <button class="btn btn-indigo btn-sm" onclick="openModal('modalScheduleExtraClass')">
+                <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                <span>Allocate Extra Class</span>
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" style="font-size: 0.85rem;" id="extraClassesTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Subject</th>
+                        <th>Instructor</th>
+                        <th>Department & Cohort</th>
+                        <th>Replacement Date</th>
+                        <th>Period</th>
+                        <th>Classroom</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="extraClassesTableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: ACTIVITY PERIODS (Sports & Cultural)                           -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-activities" style="display: none;">
+    <div class="bento-card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-heading">
+                    <i data-lucide="activity" style="width: 18px; height: 18px; color: var(--success);"></i>
+                    Sports, Cultural & Club Activity Periods
+                </h3>
+                <div class="card-subtitle">Protected non-academic periods that the automatic timetable generator preserves from class collisions</div>
+            </div>
+            <button class="btn btn-indigo btn-sm" onclick="openModal('modalNewActivity')">
+                <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                <span>Register Activity Period</span>
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" style="font-size: 0.85rem;" id="activitiesTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Activity Title</th>
+                        <th>Classification</th>
+                        <th>Schedule</th>
+                        <th>Cohort Scope</th>
+                        <th>Coordinator</th>
+                        <th>Campus Venue</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="activitiesTableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- SECTION: ANNOUNCEMENTS                                                  -->
+<!-- ======================================================================= -->
+<section class="bento-section" id="section-announcements" style="display: none;">
+    <div class="bento-card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-heading">
+                    <i data-lucide="megaphone" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Campus & Departmental Announcements
+                </h3>
+            </div>
+            <button class="btn btn-indigo btn-sm" onclick="openModal('modalNewAnnouncement')">
+                <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                <span>Broadcast Notice</span>
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" style="font-size: 0.85rem;" id="announcementsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Announcement Title</th>
+                        <th>Target Audience</th>
+                        <th>Content Preview</th>
+                        <th>Date Broadcasted</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="announcementsTableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- MODALS                                                                  -->
+<!-- ======================================================================= -->
+
+<!-- Modal: Add Faculty -->
+<div class="modal fade" id="modalAddTeacher" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content" onsubmit="saveTeacherSubmit(event)">
+            <div class="modal-header">
+                <h5 class="modal-title" style="font-size: 1rem; font-weight: 700;">Add Faculty Member</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Full Name *</label>
+                    <input type="text" class="form-control form-control-sm" id="modalTName" required placeholder="e.g. Dr. Rajesh Kumar">
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Username *</label>
+                        <input type="text" class="form-control form-control-sm" id="modalTUser" required placeholder="e.g. rajesh">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Password *</label>
+                        <input type="password" class="form-control form-control-sm" id="modalTPass" value="teacher123" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Email Address</label>
+                    <input type="email" class="form-control form-control-sm" id="modalTEmail" placeholder="rajesh@college.edu">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Department *</label>
+                    <select class="form-select form-select-sm" id="modalTDept" required>
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-sm btn-indigo">Save Faculty</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: View Teacher Specific Timetable & Classes Taken -->
+<div class="modal fade" id="modalViewTeacherSchedule" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header border-bottom">
+                <div>
+                    <h5 class="modal-title mb-1" id="adminTeacherScheduleTitle" style="font-size: 1.05rem; font-weight: 700;">Faculty Timetable Routine</h5>
+                    <div class="text-muted" id="adminTeacherScheduleSubtitle" style="font-size: 0.8rem;">Active Published Timetable Schedule</div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <!-- Summary bar -->
+                <div class="d-flex flex-wrap align-items-center justify-content-between p-2 mb-3 bg-light rounded border gap-2" style="font-size: 0.8rem;">
+                    <div id="adminTeacherClassesBadges" class="d-flex flex-wrap gap-1 align-items-center">
+                        <span class="text-muted">Loading assigned courses...</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                            <i data-lucide="check-circle" style="width: 12px; height: 12px; display: inline-block;"></i> Dynamic Sync Active
+                        </span>
+                        <span id="adminTeacherTotalLoad" class="fw-bold text-indigo">0 Hours / Week</span>
+                    </div>
+                </div>
+
+                <!-- Timetable Grid -->
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered text-center align-middle" style="font-size: 0.78rem;" id="adminTeacherScheduleTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 70px;">Day</th>
+                                <th>P1<br><small class="text-muted" style="font-size: 0.7rem;">09:00-09:50</small></th>
+                                <th>P2<br><small class="text-muted" style="font-size: 0.7rem;">09:50-10:40</small></th>
+                                <th>P3<br><small class="text-muted" style="font-size: 0.7rem;">10:40-11:30</small></th>
+                                <th>P4<br><small class="text-muted" style="font-size: 0.7rem;">11:45-12:35</small></th>
+                                <th>P5<br><small class="text-muted" style="font-size: 0.7rem;">12:35-13:25</small></th>
+                                <th>P6<br><small class="text-muted" style="font-size: 0.7rem;">14:00-14:50</small></th>
+                                <th>P7<br><small class="text-muted" style="font-size: 0.7rem;">14:50-15:40</small></th>
+                                <th>P8<br><small class="text-muted" style="font-size: 0.7rem;">15:40-16:30</small></th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTeacherScheduleTableBody">
+                            <tr><td colspan="9" class="text-center py-4 text-muted">Select a faculty member to load schedule</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer border-top d-flex justify-content-between">
+                <div class="d-flex gap-2" style="font-size: 0.75rem;">
+                    <span class="d-flex align-items-center gap-1"><span style="width: 10px; height: 10px; background: #e0e7ff; border: 1px solid #4f46e5; border-radius: 2px;"></span> Theory</span>
+                    <span class="d-flex align-items-center gap-1"><span style="width: 10px; height: 10px; background: #d1fae5; border: 1px solid #059669; border-radius: 2px;"></span> Lab Session</span>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print()">
+                        <i data-lucide="printer" style="width: 14px; height: 14px;"></i> Print Schedule
+                    </button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Student -->
+<div class="modal fade" id="modalAddStudent" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content" onsubmit="saveStudentSubmit(event)">
+            <div class="modal-header">
+                <h5 class="modal-title" style="font-size: 1rem; font-weight: 700;">Register Student</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-2 mb-3">
+                    <div class="col-7">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Full Name *</label>
+                        <input type="text" class="form-control form-control-sm" id="modalSName" required placeholder="e.g. Amit Sharma">
+                    </div>
+                    <div class="col-5">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Roll Number *</label>
+                        <input type="text" class="form-control form-control-sm" id="modalSRoll" required placeholder="CSE2024001">
+                    </div>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Username *</label>
+                        <input type="text" class="form-control form-control-sm" id="modalSUser" required placeholder="amit">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Password *</label>
+                        <input type="password" class="form-control form-control-sm" id="modalSPass" value="student123" required>
+                    </div>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Department *</label>
+                        <select class="form-select form-select-sm" id="modalSDept" required></select>
+                    </div>
+                    <div class="col-3">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Year *</label>
+                        <select class="form-select form-select-sm" id="modalSYear" required>
+                            <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+                        </select>
+                    </div>
+                    <div class="col-3">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Semester *</label>
+                        <select class="form-select form-select-sm" id="modalSSem" required>
+                            <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-sm btn-indigo">Register Student</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Add Curriculum Subject -->
+<div class="modal fade" id="modalAddSubject" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content" onsubmit="saveSubjectSubmit(event)">
+            <div class="modal-header">
+                <h5 class="modal-title" style="font-size: 1rem; font-weight: 700;">Add Curriculum Course / Subject</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Subject Name *</label>
+                    <input type="text" class="form-control form-control-sm" id="modalSubName" required placeholder="e.g. Software Engineering & Architecture">
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Subject Code *</label>
+                        <input type="text" class="form-control form-control-sm" id="modalSubCode" required placeholder="e.g. 21CS51">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Academic Department *</label>
+                        <select class="form-select form-select-sm" id="modalSubDept" required></select>
+                    </div>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-4">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Year *</label>
+                        <select class="form-select form-select-sm" id="modalSubYear" required>
+                            <option value="1">Year 1</option>
+                            <option value="2">Year 2</option>
+                            <option value="3" selected>Year 3</option>
+                            <option value="4">Year 4</option>
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Semester *</label>
+                        <select class="form-select form-select-sm" id="modalSubSem" required>
+                            <option value="1">Sem 1</option>
+                            <option value="2">Sem 2</option>
+                            <option value="3">Sem 3</option>
+                            <option value="4">Sem 4</option>
+                            <option value="5" selected>Sem 5</option>
+                            <option value="6">Sem 6</option>
+                            <option value="7">Sem 7</option>
+                            <option value="8">Sem 8</option>
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Weekly Hours *</label>
+                        <input type="number" class="form-control form-control-sm" id="modalSubHours" min="1" max="10" value="4" required>
+                    </div>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Course Type *</label>
+                        <select class="form-select form-select-sm" id="modalSubType" required>
+                            <option value="theory">Theory Lecture</option>
+                            <option value="lab">Specialized Laboratory</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Assigned Instructor</label>
+                        <select class="form-select form-select-sm" id="modalSubTeacher">
+                            <option value="">-- Optional: Assign Later --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-sm btn-indigo">Save Subject</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Add Facility (Classroom or Lab) -->
+<div class="modal fade" id="modalAddClassroom" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content" onsubmit="saveClassroomSubmit(event)">
+            <div class="modal-header">
+                <h5 class="modal-title" style="font-size: 1rem; font-weight: 700;">Add Classroom or Specialized Laboratory</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Facility Name *</label>
+                    <input type="text" class="form-control form-control-sm" id="modalRoomName" required placeholder="e.g. Room 204 (LH-4) or AI & Robotics Lab">
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Facility Type *</label>
+                        <select class="form-select form-select-sm" id="modalRoomType" required>
+                            <option value="classroom">Lecture Hall / Classroom</option>
+                            <option value="lab">Specialized Laboratory</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Seating Capacity *</label>
+                        <input type="number" class="form-control form-control-sm" id="modalRoomCap" min="10" max="300" value="60" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Building / Wing Location *</label>
+                    <input type="text" class="form-control form-control-sm" id="modalRoomBld" required placeholder="e.g. CSE Academic Block, 2nd Floor">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-sm btn-indigo">Save Facility</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Add Academic Department -->
+<div class="modal fade" id="modalAddDepartment" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content" onsubmit="saveDepartmentSubmit(event)">
+            <div class="modal-header">
+                <h5 class="modal-title" style="font-size: 1rem; font-weight: 700;">Add Academic Department</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Department Name *</label>
+                    <input type="text" class="form-control form-control-sm" id="modalDeptName" required placeholder="e.g. Information Science and Engineering">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Department Code *</label>
+                    <input type="text" class="form-control form-control-sm" id="modalDeptCode" required placeholder="e.g. ISE" style="text-transform: uppercase;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-sm btn-indigo">Save Department</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Edit Timetable Slot -->
+<div class="modal fade" id="modalEditSlot" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content" onsubmit="saveSlotEditSubmit(event)">
+            <div class="modal-header">
+                <h5 class="modal-title" style="font-size: 1rem; font-weight: 700;">Edit Period Slot</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editSlotId">
+                <div class="p-2 mb-3 rounded bg-light" id="editSlotMetaDesc" style="font-size: 0.825rem; font-weight: 600;"></div>
+
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Subject</label>
+                    <select class="form-select form-select-sm" id="editSlotSubject" onchange="autoAssignSlotTeacher()">
+                        <option value="">-- Free Period --</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Instructor</label>
+                    <select class="form-select form-select-sm" id="editSlotTeacher">
+                        <option value="">-- Auto-select from subject default --</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Classroom / Lab</label>
+                    <select class="form-select form-select-sm" id="editSlotRoom">
+                        <option value="">-- Select Room --</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Classification</label>
+                    <select class="form-select form-select-sm" id="editSlotType">
+                        <option value="regular">Regular Theory</option>
+                        <option value="lab">Laboratory Session</option>
+                        <option value="activity">Protected Activity Period</option>
+                        <option value="extra">Extra Recovery Class</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-danger me-auto" onclick="clearCurrentSlot()">Clear to Free</button>
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-sm btn-indigo">Save Slot</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Add Event -->
+<div class="modal fade" id="modalNewEvent" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content" onsubmit="saveEventSubmit(event)">
+            <div class="modal-header">
+                <h5 class="modal-title" style="font-size: 1rem; font-weight: 700;">Schedule Academic Event / Workshop</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Event Title *</label>
+                    <input type="text" class="form-control form-control-sm" id="evTitle" required placeholder="e.g. AI Symposium & Robotics Expo">
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Classification *</label>
+                        <select class="form-select form-select-sm" id="evType" required>
+                            <option value="workshop">Workshop</option>
+                            <option value="seminar">Seminar</option>
+                            <option value="holiday">Holiday</option>
+                            <option value="event">Institutional Function</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Event Date *</label>
+                        <input type="date" class="form-control form-control-sm" id="evDate" required>
+                    </div>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Affected Department</label>
+                        <select class="form-select form-select-sm" id="evDept">
+                            <option value="">All Departments</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Periods Cancelled / Lost</label>
+                        <input type="number" class="form-control form-control-sm" id="evPeriodsLost" min="0" max="8" value="2">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Description</label>
+                    <textarea class="form-control form-control-sm" id="evDesc" rows="2" placeholder="Brief event scope and instructions..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-sm btn-indigo">Log Event & Track Lost Periods</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Schedule Extra Class (Lost-Class Recovery) -->
+<div class="modal fade" id="modalScheduleExtraClass" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content" onsubmit="saveExtraClassSubmit(event)">
+            <div class="modal-header">
+                <h5 class="modal-title" style="font-size: 1rem; font-weight: 700;">Allocate Extra Teaching Hour (Recovery)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Curriculum Subject *</label>
+                    <select class="form-select form-select-sm" id="extraSubjectSelect" required onchange="autoFillExtraTeacher()">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Faculty Instructor *</label>
+                    <select class="form-select form-select-sm" id="extraTeacherSelect" required>
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Replacement Date *</label>
+                        <input type="date" class="form-control form-control-sm" id="extraDate" required>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Period Slot *</label>
+                        <select class="form-select form-select-sm" id="extraPeriod" required>
+                            <option value="4">Period 4 (11:45 - 12:35)</option>
+                            <option value="5">Period 5 (12:35 - 01:25)</option>
+                            <option value="6">Period 6 (02:00 - 02:50)</option>
+                            <option value="7">Period 7 (02:50 - 03:40)</option>
+                            <option value="8">Period 8 (03:40 - 04:30)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Assigned Classroom *</label>
+                    <select class="form-select form-select-sm" id="extraRoomSelect" required></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-sm btn-indigo">Allocate Extra Class</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Register Activity Period -->
+<div class="modal fade" id="modalNewActivity" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content" onsubmit="saveActivitySubmit(event)">
+            <div class="modal-header">
+                <h5 class="modal-title" style="font-size: 1rem; font-weight: 700;">Register Activity Period</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Activity Title *</label>
+                    <input type="text" class="form-control form-control-sm" id="actName" required placeholder="e.g. Inter-House Football & Fitness">
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Type *</label>
+                        <select class="form-select form-select-sm" id="actType" required>
+                            <option value="sports">Sports & Athletics</option>
+                            <option value="cultural">Cultural Activities</option>
+                            <option value="music">Music & Band</option>
+                            <option value="dance">Dance & Performing Arts</option>
+                            <option value="club">Student Club / Society</option>
+                            <option value="special">Special Seminar</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Campus Venue</label>
+                        <input type="text" class="form-control form-control-sm" id="actVenue" placeholder="Sports Ground / Auditorium">
+                    </div>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Day *</label>
+                        <select class="form-select form-select-sm" id="actDay" required>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Thursday">Thursday</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Period *</label>
+                        <select class="form-select form-select-sm" id="actPeriod" required>
+                            <option value="8">Period 8 (03:40 - 04:30)</option>
+                            <option value="7">Period 7 (02:50 - 03:40)</option>
+                            <option value="6">Period 6 (02:00 - 02:50)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-sm btn-indigo">Save & Protect Period</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Broadcast Announcement -->
+<div class="modal fade" id="modalNewAnnouncement" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content" onsubmit="saveAnnouncementSubmit(event)">
+            <div class="modal-header">
+                <h5 class="modal-title" style="font-size: 1rem; font-weight: 700;">Broadcast Announcement</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Notice Title *</label>
+                    <input type="text" class="form-control form-control-sm" id="annTitleInput" required placeholder="e.g. Mid-term Exam Schedule & Room Allocations">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Target Audience</label>
+                    <select class="form-select form-select-sm" id="annTargetDeptInput">
+                        <option value="all">Campus Wide (All Students & Faculty)</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Notice Details *</label>
+                    <textarea class="form-control form-control-sm" id="annContentInput" rows="3" required placeholder="Type the complete message text..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-sm btn-indigo">Publish Notice</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script src="/static/js/admin.js"></script>
+{% endblock %}

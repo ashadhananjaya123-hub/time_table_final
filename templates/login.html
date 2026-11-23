@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - TimetablePro Automation System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body.login-layout {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 50%, #f1f5f9 100%);
+            padding: 1.5rem;
+        }
+        .login-card-container {
+            width: 100%;
+            max-width: 440px;
+        }
+        .login-box {
+            background-color: #ffffff;
+            border: 1px solid var(--slate-200);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+            padding: 2.25rem 2rem;
+        }
+        .login-logo-box {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--primary) 0%, #4338ca 100%);
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.85rem;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
+        }
+        .role-switch-pill {
+            display: flex;
+            background-color: var(--slate-100);
+            border-radius: var(--radius-sm);
+            padding: 0.25rem;
+            margin-bottom: 1.5rem;
+            gap: 0.25rem;
+        }
+        .role-pill-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 0.55rem 0.4rem;
+            font-size: 0.825rem;
+            font-weight: 600;
+            color: var(--slate-600);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+        }
+        .role-pill-btn.active {
+            background-color: #ffffff;
+            color: var(--primary);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        .input-group-custom {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .input-icon-adornment {
+            position: absolute;
+            left: 0.85rem;
+            color: var(--slate-400);
+            display: flex;
+            align-items: center;
+            pointer-events: none;
+        }
+        .input-group-custom input {
+            width: 100%;
+            padding: 0.65rem 0.85rem 0.65rem 2.5rem;
+            border: 1px solid var(--slate-200);
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            color: var(--slate-800);
+            background-color: #ffffff;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .input-group-custom input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+        .quick-demo-box {
+            margin-top: 1.75rem;
+            padding-top: 1.25rem;
+            border-top: 1px dashed var(--slate-200);
+        }
+        .demo-pill-action {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            background-color: var(--slate-50);
+            border: 1px solid var(--slate-200);
+            border-radius: var(--radius-sm);
+            font-size: 0.78rem;
+            cursor: pointer;
+            margin-bottom: 0.45rem;
+            transition: all 0.15s;
+        }
+        .demo-pill-action:hover {
+            background-color: var(--primary-light);
+            border-color: var(--primary-border);
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body class="login-layout">
+    <div class="login-card-container">
+        <div class="login-box">
+            <div class="text-center mb-4">
+                <div class="login-logo-box">
+                    <i data-lucide="calendar" style="width: 24px; height: 24px;"></i>
+                </div>
+                <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--slate-900); margin: 0;">TimetablePro</h2>
+                <div style="font-size: 0.825rem; color: var(--slate-500); margin-top: 0.25rem;">
+                    Automated Class Timetable & Academic Management System
+                </div>
+            </div>
+
+            <!-- Role Selector Tabs -->
+            <div class="role-switch-pill" role="tablist">
+                <button type="button" class="role-pill-btn active" data-role="admin" onclick="setRole('admin')">
+                    <i data-lucide="shield" style="width: 14px; height: 14px;"></i>
+                    <span>Admin</span>
+                </button>
+                <button type="button" class="role-pill-btn" data-role="teacher" onclick="setRole('teacher')">
+                    <i data-lucide="graduation-cap" style="width: 14px; height: 14px;"></i>
+                    <span>Faculty</span>
+                </button>
+                <button type="button" class="role-pill-btn" data-role="student" onclick="setRole('student')">
+                    <i data-lucide="user" style="width: 14px; height: 14px;"></i>
+                    <span>Student</span>
+                </button>
+            </div>
+
+            <!-- Error Notification Alert -->
+            <div class="alert alert-danger py-2 px-3 mb-3 d-flex align-items-center gap-2" id="loginAlertBox" style="display: none !important; font-size: 0.825rem;">
+                <i data-lucide="alert-circle" style="width: 16px; height: 16px; flex-shrink: 0;"></i>
+                <span id="loginAlertMsg">Invalid credentials.</span>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" onsubmit="handleLoginSubmit(event)">
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 0.8rem; font-weight: 600; color: var(--slate-700);">Username</label>
+                    <div class="input-group-custom">
+                        <span class="input-icon-adornment">
+                            <i data-lucide="user" style="width: 16px; height: 16px;"></i>
+                        </span>
+                        <input type="text" id="usernameInput" placeholder="Enter username" autocomplete="username" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label mb-0" style="font-size: 0.8rem; font-weight: 600; color: var(--slate-700);">Password</label>
+                        <a href="#" onclick="openForgotModal(); return false;" style="font-size: 0.775rem; color: var(--primary); text-decoration: none; font-weight: 600;">Forgot Password?</a>
+                    </div>
+                    <div class="input-group-custom">
+                        <span class="input-icon-adornment">
+                            <i data-lucide="lock" style="width: 16px; height: 16px;"></i>
+                        </span>
+                        <input type="password" id="passwordInput" placeholder="Enter password" autocomplete="current-password" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-indigo w-100 py-2 justify-content-center" id="btnLoginSubmit">
+                    <span>Sign In</span>
+                    <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
+                </button>
+            </form>
+
+            <!-- Quick Demo Credentials 
+            <div class="quick-demo-box">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--slate-400); letter-spacing: 0.05em;">Quick Demo Credentials</span>
+                    <span style="font-size: 0.72rem; color: var(--slate-400);">Click to auto-fill</span>
+                </div>
+                
+                <div class="demo-pill-action" onclick="quickFill('admin', 'admin', 'admin123')">
+                    <div class="d-flex align-items-center gap-2">
+                        <i data-lucide="shield" style="width: 14px; height: 14px; color: var(--primary);"></i>
+                        <span style="font-weight: 600;">Administrator</span>
+                    </div>
+                    <code style="color: var(--slate-500); font-size: 0.75rem;">admin / admin123</code>
+                </div>
+
+                <div class="demo-pill-action" onclick="quickFill('teacher', 'bindiya', 'teacher123')">
+                    <div class="d-flex align-items-center gap-2">
+                        <i data-lucide="graduation-cap" style="width: 14px; height: 14px; color: var(--success);"></i>
+                        <span style="font-weight: 600;">Faculty (Dr. Bindiya)</span>
+                    </div>
+                    <code style="color: var(--slate-500); font-size: 0.75rem;">bindiya / teacher123</code>
+                </div>
+
+                <div class="demo-pill-action" onclick="quickFill('student', 'amit', 'student123')">
+                    <div class="d-flex align-items-center gap-2">
+                        <i data-lucide="user" style="width: 14px; height: 14px; color: var(--info);"></i>
+                        <span style="font-weight: 600;">Student (Amit Sharma)</span>
+                    </div>
+                    <code style="color: var(--slate-500); font-size: 0.75rem;">amit / student123</code>
+                </div>
+            </div> -->
+        </div>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- MODAL: FORGOT / RESET PASSWORD WITH EMAIL & MOBILE VERIFICATION       -->
+    <!-- ======================================================================= -->
+    <div class="modal fade" id="modalForgotPass" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+            <div class="modal-content" style="border: 1px solid var(--slate-200); border-radius: var(--radius-md); box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                <div class="modal-header border-0 pb-0">
+                    <div>
+                        <h5 class="modal-title fw-bold" style="font-size: 1.1rem; color: var(--slate-900);">Reset Account Password</h5>
+                        <div class="text-muted" style="font-size: 0.775rem;">Verified via registered email and mobile number</div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-3">
+                    <!-- Status / Alert Message -->
+                    <div class="alert py-2 px-3 mb-3 d-none align-items-center gap-2" id="forgotAlert" style="font-size: 0.8rem;">
+                        <span id="forgotAlertText"></span>
+                    </div>
+
+                    <!-- STEP 1: Identification & OTP Request -->
+                    <div id="forgotStep1">
+                        <div class="mb-3">
+                            <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Account Username *</label>
+                            <input type="text" class="form-control form-control-sm" id="forgotUsername" placeholder="e.g. naveena or amit">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Registered Email Address *</label>
+                            <input type="email" class="form-control form-control-sm" id="forgotEmail" placeholder="e.g. naveena.c@sjbit.edu.in">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Registered Mobile Number *</label>
+                            <input type="tel" class="form-control form-control-sm" id="forgotPhone" placeholder="e.g. 9876540002">
+                        </div>
+                        <button type="button" class="btn btn-indigo w-100 py-2 justify-content-center" id="btnRequestOtp" onclick="handleRequestOtp()">
+                            <span>Send Verification Code</span>
+                            <i data-lucide="send" style="width: 14px; height: 14px;"></i>
+                        </button>
+                    </div>
+
+                    <!-- STEP 2: Enter OTP & New Password -->
+                    <div id="forgotStep2" style="display: none;">
+                        <div class="alert alert-info py-2 px-3 mb-3" style="font-size: 0.775rem;">
+                            <div class="fw-semibold">Verification Code Sent!</div>
+                            <div id="otpNotice">Check your email/SMS.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">6-Digit Verification Code (OTP) *</label>
+                            <input type="text" class="form-control form-control-sm text-center fw-bold" id="forgotOtp" placeholder="XXXXXX" maxlength="6" style="letter-spacing: 0.25em; font-size: 1.1rem;">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">New Password *</label>
+                            <input type="password" class="form-control form-control-sm" id="forgotNewPass" placeholder="Min. 6 characters">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Confirm New Password *</label>
+                            <input type="password" class="form-control form-control-sm" id="forgotConfirmPass" placeholder="Re-enter new password">
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="backToStep1()">
+                                <i data-lucide="arrow-left" style="width: 14px; height: 14px;"></i>
+                                <span>Back</span>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-indigo flex-grow-1 justify-content-center" id="btnResetPass" onclick="handleVerifyAndReset()">
+                                <span>Reset Password & Sign In</span>
+                                <i data-lucide="check" style="width: 14px; height: 14px;"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap & Lucide Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        let selectedRole = 'admin';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) window.lucide.createIcons();
+        });
+
+        function setRole(role) {
+            selectedRole = role;
+            document.querySelectorAll('.role-pill-btn').forEach(btn => {
+                if (btn.dataset.role === role) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            hideAlert();
+        }
+
+        function showAlert(msg) {
+            const box = document.getElementById('loginAlertBox');
+            const msgEl = document.getElementById('loginAlertMsg');
+            msgEl.textContent = msg;
+            box.style.setProperty('display', 'flex', 'important');
+        }
+
+        function hideAlert() {
+            const box = document.getElementById('loginAlertBox');
+            box.style.setProperty('display', 'none', 'important');
+        }
+
+        function quickFill(role, user, pass) {
+            setRole(role);
+            document.getElementById('usernameInput').value = user;
+            document.getElementById('passwordInput').value = pass;
+            hideAlert();
+        }
+
+        async function handleLoginSubmit(e) {
+            e.preventDefault();
+            hideAlert();
+
+            const username = document.getElementById('usernameInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            const btn = document.getElementById('btnLoginSubmit');
+
+            if (!username || !password) {
+                showAlert('Username and password are required.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span>Verifying...</span>';
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, role: selectedRole })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    window.location.href = data.redirect_url || `/${selectedRole}`;
+                } else {
+                    showAlert(data.message || 'Login failed. Please check your credentials.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>Sign In</span><i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>';
+                    if (window.lucide) window.lucide.createIcons();
+                }
+            } catch (err) {
+                showAlert('Server connection error. Please ensure the backend is running.');
+                btn.disabled = false;
+                btn.innerHTML = '<span>Sign In</span><i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>';
+                if (window.lucide) window.lucide.createIcons();
+            }
+        }
+
+        function openForgotModal() {
+            const modalEl = document.getElementById('modalForgotPass');
+            const modal = new bootstrap.Modal(modalEl);
+            backToStep1();
+            const currUser = document.getElementById('usernameInput')?.value || '';
+            if (currUser) document.getElementById('forgotUsername').value = currUser;
+            modal.show();
+            if (window.lucide) window.lucide.createIcons();
+        }
+
+        function backToStep1() {
+            document.getElementById('forgotStep1').style.display = 'block';
+            document.getElementById('forgotStep2').style.display = 'none';
+            hideForgotAlert();
+        }
+
+        function showForgotAlert(msg, type = 'danger') {
+            const box = document.getElementById('forgotAlert');
+            const txt = document.getElementById('forgotAlertText');
+            box.className = `alert alert-${type} py-2 px-3 mb-3 d-flex align-items-center gap-2`;
+            txt.textContent = msg;
+            box.classList.remove('d-none');
+        }
+
+        function hideForgotAlert() {
+            document.getElementById('forgotAlert').classList.add('d-none');
+        }
+
+        async function handleRequestOtp() {
+            hideForgotAlert();
+            const username = document.getElementById('forgotUsername').value.trim();
+            const email = document.getElementById('forgotEmail').value.trim();
+            const phone = document.getElementById('forgotPhone').value.trim();
+            const btn = document.getElementById('btnRequestOtp');
+
+            if (!username || !email || !phone) {
+                showForgotAlert('Please fill in username, registered email, and mobile number.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span>Verifying Records...</span>';
+
+            try {
+                const res = await fetch('/api/auth/forgot-password/request-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, phone })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('forgotStep1').style.display = 'none';
+                    document.getElementById('forgotStep2').style.display = 'block';
+                    document.getElementById('otpNotice').textContent = data.message;
+                    // Auto-fill demonstration OTP for quick testing
+                    if (data.demo_otp) {
+                        document.getElementById('forgotOtp').value = data.demo_otp;
+                    }
+                    if (window.lucide) window.lucide.createIcons();
+                } else {
+                    showForgotAlert(data.message || 'Verification failed.');
+                }
+            } catch (err) {
+                showForgotAlert('Failed to connect to authentication server.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Send Verification Code</span><i data-lucide="send" style="width: 14px; height: 14px;"></i>';
+                if (window.lucide) window.lucide.createIcons();
+            }
+        }
+
+        async function handleVerifyAndReset() {
+            hideForgotAlert();
+            const username = document.getElementById('forgotUsername').value.trim();
+            const otp = document.getElementById('forgotOtp').value.trim();
+            const new_password = document.getElementById('forgotNewPass').value;
+            const confirm_password = document.getElementById('forgotConfirmPass').value;
+            const btn = document.getElementById('btnResetPass');
+
+            if (!otp || !new_password) {
+                showForgotAlert('Verification code and new password are required.');
+                return;
+            }
+            if (new_password.length < 6) {
+                showForgotAlert('Password must be at least 6 characters.');
+                return;
+            }
+            if (new_password !== confirm_password) {
+                showForgotAlert('New password and confirmation do not match.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span>Updating Password...</span>';
+
+            try {
+                const res = await fetch('/api/auth/forgot-password/verify-and-reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, otp, new_password })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    showForgotAlert(data.message, 'success');
+                    setTimeout(() => {
+                        const modalEl = document.getElementById('modalForgotPass');
+                        const modal = bootstrap.Modal.getInstance(modalEl);
+                        if (modal) modal.hide();
+                        document.getElementById('usernameInput').value = username;
+                        document.getElementById('passwordInput').value = new_password;
+                        showAlert('Password reset successful. Please sign in with your new password.', 'success');
+                    }, 1200);
+                } else {
+                    showForgotAlert(data.message || 'Password update failed.');
+                }
+            } catch (err) {
+                showForgotAlert('Failed to connect to authentication server.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Reset Password & Sign In</span><i data-lucide="check" style="width: 14px; height: 14px;"></i>';
+                if (window.lucide) window.lucide.createIcons();
+            }
+        }
+    </script>
+</body>
+</html>
