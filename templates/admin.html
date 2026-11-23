@@ -538,7 +538,7 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <select class="form-select form-select-sm" id="filterStudentYear" onchange="filterStudentsTable()">
+                <select class="form-select form-select-sm" id="filterStudentYear" onchange="onStudentYearFilterChange()">
                     <option value="all">All Years</option>
                     <option value="1">Year 1</option>
                     <option value="2">Year 2</option>
@@ -553,6 +553,10 @@
                     <option value="2">Sem 2</option>
                     <option value="3">Sem 3</option>
                     <option value="4">Sem 4</option>
+                    <option value="5">Sem 5</option>
+                    <option value="6">Sem 6</option>
+                    <option value="7">Sem 7</option>
+                    <option value="8">Sem 8</option>
                 </select>
             </div>
         </div>
@@ -1122,20 +1126,39 @@
                     </div>
                 </div>
                 <div class="row g-2 mb-3">
-                    <div class="col-6">
+                    <div class="col-5">
                         <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Department *</label>
                         <select class="form-select form-select-sm" id="modalSDept" required></select>
                     </div>
-                    <div class="col-3">
+                    <div class="col-2">
                         <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Year *</label>
-                        <select class="form-select form-select-sm" id="modalSYear" required>
-                            <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+                        <select class="form-select form-select-sm" id="modalSYear" required onchange="onStudentModalYearChange()">
+                            <option value="1">Year 1</option>
+                            <option value="2">Year 2</option>
+                            <option value="3">Year 3</option>
+                            <option value="4">Year 4</option>
                         </select>
                     </div>
                     <div class="col-3">
                         <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Semester *</label>
                         <select class="form-select form-select-sm" id="modalSSem" required>
-                            <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+                            <option value="1">Sem 1</option>
+                            <option value="2">Sem 2</option>
+                            <option value="3">Sem 3</option>
+                            <option value="4">Sem 4</option>
+                            <option value="5">Sem 5</option>
+                            <option value="6">Sem 6</option>
+                            <option value="7">Sem 7</option>
+                            <option value="8">Sem 8</option>
+                        </select>
+                    </div>
+                    <div class="col-2">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Section *</label>
+                        <select class="form-select form-select-sm" id="modalSSec" required>
+                            <option value="A" selected>Sec A</option>
+                            <option value="B">Sec B</option>
+                            <option value="C">Sec C</option>
+                            <option value="D">Sec D</option>
                         </select>
                     </div>
                 </div>

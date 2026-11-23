@@ -950,25 +950,68 @@ async function filterStudentsTable() {
 
 async function saveStudentSubmit(e) {
     e.preventDefault();
-    const name = document.getElementById('modalSName').value;
-    const roll = document.getElementById('modalSRoll').value;
-    const username = document.getElementById('modalSUser').value;
+    const name = document.getElementById('modalSName').value.trim();
+    const roll = document.getElementById('modalSRoll').value.trim();
+    const username = document.getElementById('modalSUser').value.trim();
     const password = document.getElementById('modalSPass').value;
     const dept = document.getElementById('modalSDept').value;
     const year = document.getElementById('modalSYear').value;
     const sem = document.getElementById('modalSSem').value;
+    const section = document.getElementById('modalSSec')?.value || 'A';
 
     const res = await apiCall('/api/students', 'POST', {
-        name, roll_no: roll, username, password, department_id: dept, year, semester: sem
+        name, roll_no: roll, username, password, department_id: dept, year, semester: sem, section
     });
 
     if (res.success) {
         showToast('Student registered successfully.', 'success');
         closeModal('modalAddStudent');
+        document.getElementById('modalSName').value = '';
+        document.getElementById('modalSRoll').value = '';
+        document.getElementById('modalSUser').value = '';
         filterStudentsTable();
         loadDashboardStats();
     } else {
         showToast(res.message, 'danger');
+    }
+}
+
+function onStudentYearFilterChange() {
+    const yVal = document.getElementById('filterStudentYear')?.value || 'all';
+    const semEl = document.getElementById('filterStudentSem');
+    if (semEl) {
+        if (yVal === 'all') {
+            semEl.innerHTML = `
+                <option value="all">All Semesters</option>
+                <option value="1">Sem 1</option><option value="2">Sem 2</option>
+                <option value="3">Sem 3</option><option value="4">Sem 4</option>
+                <option value="5">Sem 5</option><option value="6">Sem 6</option>
+                <option value="7">Sem 7</option><option value="8">Sem 8</option>
+            `;
+        } else {
+            const y = parseInt(yVal);
+            const s1 = (y - 1) * 2 + 1;
+            const s2 = s1 + 1;
+            semEl.innerHTML = `
+                <option value="all">All Year ${y} (Sem ${s1} & ${s2})</option>
+                <option value="${s1}">Sem ${s1}</option>
+                <option value="${s2}">Sem ${s2}</option>
+            `;
+        }
+    }
+    filterStudentsTable();
+}
+
+function onStudentModalYearChange() {
+    const yVal = parseInt(document.getElementById('modalSYear')?.value || '1');
+    const s1 = (yVal - 1) * 2 + 1;
+    const s2 = s1 + 1;
+    const semEl = document.getElementById('modalSSem');
+    if (semEl) {
+        semEl.innerHTML = `
+            <option value="${s1}" selected>Sem ${s1}</option>
+            <option value="${s2}">Sem ${s2}</option>
+        `;
     }
 }
 
