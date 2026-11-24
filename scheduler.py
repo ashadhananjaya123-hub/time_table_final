@@ -135,12 +135,23 @@ def generate_timetable(department_id, year, semester, section="A"):
             "errors": [f"No curriculum subjects found for selected Department, Year {y}, Semester {s}."]
         }
         
-    # Check that subjects have assigned teachers
+    # Check that subjects have assigned teachers strictly from this department
     for sub in subjects:
         if not sub.get('teacher_id'):
             return {
                 "success": False,
                 "errors": [f"Subject '{sub['name']}' ({sub['code']}) has no assigned instructor. Assign faculty first."]
+            }
+        t_user = query_db("SELECT id, name, department_id FROM users WHERE id = ? AND role = 'teacher'", (sub['teacher_id'],), one=True)
+        if not t_user:
+            return {
+                "success": False,
+                "errors": [f"Assigned instructor for '{sub['code']}' not found in faculty records."]
+            }
+        if t_user.get('department_id') and t_user['department_id'] != department_id:
+            return {
+                "success": False,
+                "errors": [f"Faculty member '{t_user['name']}' assigned to '{sub['code']}' belongs to department '{t_user['department_id']}', not '{department_id}'. External department faculty cannot be scheduled."]
             }
             
     # 2. Fetch facilities
@@ -195,16 +206,22 @@ def generate_timetable(department_id, year, semester, section="A"):
         
         # Lock in protected activity periods
         for (act_day, act_period), act in protected_activity_slots.items():
+            coord_t_id = act.get('coordinator_teacher_id')
+            if coord_t_id:
+                coord_user = query_db("SELECT department_id FROM users WHERE id = ?", (coord_t_id,), one=True)
+                if not coord_user or coord_user.get('department_id') != department_id:
+                    coord_t_id = None
+
             grid[(act_day, act_period)] = {
                 "day": act_day,
                 "period": act_period,
                 "subject_id": None,
-                "teacher_id": act.get('coordinator_teacher_id'),
+                "teacher_id": coord_t_id,
                 "classroom_id": None,
                 "slot_type": "activity"
             }
-            if act.get('coordinator_teacher_id'):
-                attempt_teachers_busy.add(f"{act['coordinator_teacher_id']}_{act_day}_{act_period}")
+            if coord_t_id:
+                attempt_teachers_busy.add(f"{coord_t_id}_{act_day}_{act_period}")
 
         # Separate subject units into Labs and Theory
         lab_units = []

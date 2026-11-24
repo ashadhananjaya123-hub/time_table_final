@@ -170,22 +170,35 @@
                     </select>
                 </div>
                 <div class="row g-2 mb-3">
-                    <div class="col-6">
+                    <div class="col-4">
                         <label class="form-label" style="font-size: 0.78rem; font-weight: 600;">Year</label>
-                        <select class="form-select form-select-sm" id="quickYearSelect" required>
+                        <select class="form-select form-select-sm" id="quickYearSelect" required onchange="onQuickYearChange()">
                             <option value="1">1st Year</option>
                             <option value="2">2nd Year</option>
                             <option value="3">3rd Year</option>
                             <option value="4">4th Year</option>
                         </select>
                     </div>
-                    <div class="col-6">
+                    <div class="col-4">
                         <label class="form-label" style="font-size: 0.78rem; font-weight: 600;">Semester</label>
                         <select class="form-select form-select-sm" id="quickSemSelect" required>
                             <option value="1">Semester 1</option>
                             <option value="2">Semester 2</option>
                             <option value="3">Semester 3</option>
                             <option value="4">Semester 4</option>
+                            <option value="5">Semester 5</option>
+                            <option value="6">Semester 6</option>
+                            <option value="7">Semester 7</option>
+                            <option value="8">Semester 8</option>
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label" style="font-size: 0.78rem; font-weight: 600;">Section</label>
+                        <select class="form-select form-select-sm" id="quickSecSelect" required>
+                            <option value="A" selected>Section A</option>
+                            <option value="B">Section B</option>
+                            <option value="C">Section C</option>
+                            <option value="D">Section D</option>
                         </select>
                     </div>
                 </div>
@@ -252,7 +265,7 @@
             </div>
             <div class="col-md-2">
                 <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Year</label>
-                <select class="form-select form-select-sm" id="ttFilterYear" onchange="loadSelectedTimetable()">
+                <select class="form-select form-select-sm" id="ttFilterYear" onchange="onTtYearChange()">
                     <option value="1">1st Year</option>
                     <option value="2">2nd Year</option>
                     <option value="3">3rd Year</option>
@@ -266,9 +279,22 @@
                     <option value="2">Semester 2</option>
                     <option value="3">Semester 3</option>
                     <option value="4">Semester 4</option>
+                    <option value="5">Semester 5</option>
+                    <option value="6">Semester 6</option>
+                    <option value="7">Semester 7</option>
+                    <option value="8">Semester 8</option>
                 </select>
             </div>
-            <div class="col-md-5 d-flex gap-2 justify-content-md-end flex-wrap">
+            <div class="col-md-2">
+                <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Section</label>
+                <select class="form-select form-select-sm" id="ttFilterSec" onchange="loadSelectedTimetable()">
+                    <option value="A" selected>Section A</option>
+                    <option value="B">Section B</option>
+                    <option value="C">Section C</option>
+                    <option value="D">Section D</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2 justify-content-md-end flex-wrap">
                 <button class="btn btn-indigo btn-sm" id="btnTriggerGenerate" onclick="generateCurrentTimetable()">
                     <i data-lucide="sparkles" style="width: 14px; height: 14px;"></i>
                     <span>Generate Schedule</span>
@@ -427,12 +453,22 @@
                     <label class="form-label mb-1" style="font-size: 0.75rem; font-weight: 600; color: var(--slate-600);">Cohort / Semester</label>
                     <select class="form-select form-select-sm" id="calFilterCohort" onchange="refreshAdminCalendar()">
                         <option value="all">All Semesters & Sections</option>
+                        <option value="1_A">Semester 1 - Sec A</option>
+                        <option value="1_B">Semester 1 - Sec B</option>
+                        <option value="2_A">Semester 2 - Sec A</option>
+                        <option value="2_B">Semester 2 - Sec B</option>
                         <option value="3_A">Semester 3 - Sec A</option>
                         <option value="3_B">Semester 3 - Sec B</option>
+                        <option value="4_A">Semester 4 - Sec A</option>
+                        <option value="4_B">Semester 4 - Sec B</option>
                         <option value="5_A">Semester 5 - Sec A</option>
                         <option value="5_B">Semester 5 - Sec B</option>
+                        <option value="6_A">Semester 6 - Sec A</option>
+                        <option value="6_B">Semester 6 - Sec B</option>
                         <option value="7_A">Semester 7 - Sec A</option>
                         <option value="7_B">Semester 7 - Sec B</option>
+                        <option value="8_A">Semester 8 - Sec A</option>
+                        <option value="8_B">Semester 8 - Sec B</option>
                     </select>
                 </div>
                 <div class="col-md-3 d-flex align-items-end gap-2 pt-3">

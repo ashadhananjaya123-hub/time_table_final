@@ -36,9 +36,10 @@ async function initStudentPortal() {
         document.getElementById('studentSectionBadge').textContent = `Section ${myProfile.section || 'A'}`;
     }
 
+    const sec = myProfile.section || 'A';
     const [deptRes, ttRes, subRes, tchRes] = await Promise.all([
         apiCall('/api/departments'),
-        apiCall(`/api/timetables?department_id=${myProfile.department_id}&year=${myProfile.year}&semester=${myProfile.semester}`),
+        apiCall(`/api/timetables?department_id=${myProfile.department_id}&year=${myProfile.year}&semester=${myProfile.semester}&section=${encodeURIComponent(sec)}`),
         apiCall(`/api/subjects?department_id=${myProfile.department_id}&year=${myProfile.year}&semester=${myProfile.semester}`),
         apiCall('/api/teachers')
     ]);

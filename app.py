@@ -1229,9 +1229,9 @@ def api_calendar_events():
                 LEFT JOIN subjects sub ON ts.subject_id = sub.id
                 LEFT JOIN classrooms cls ON ts.classroom_id = cls.id
                 LEFT JOIN users u ON ts.teacher_id = u.id
-                WHERE t.department_id = ? AND t.year = ? AND t.semester = ? AND t.published = 1
+                WHERE t.department_id = ? AND t.year = ? AND t.semester = ? AND (t.section = ? OR t.section IS NULL) AND t.published = 1
                 """,
-                (user['department_id'], user['year'], user['semester'])
+                (user['department_id'], user['year'], user['semester'], user.get('section') or 'A')
             )
         else: # Admin (with optional filters)
             sql = """

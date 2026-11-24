@@ -246,6 +246,7 @@ async function handleQuickGenerate(e) {
     const dept = document.getElementById('quickDeptSelect').value;
     const year = document.getElementById('quickYearSelect').value;
     const sem = document.getElementById('quickSemSelect').value;
+    const sec = document.getElementById('quickSecSelect')?.value || 'A';
 
     const btn = document.getElementById('btnQuickGen');
     btn.disabled = true;
@@ -254,7 +255,8 @@ async function handleQuickGenerate(e) {
     const res = await apiCall('/api/timetables/generate', 'POST', {
         department_id: dept,
         year: year,
-        semester: sem
+        semester: sem,
+        section: sec
     });
 
     btn.disabled = false;
@@ -266,7 +268,9 @@ async function handleQuickGenerate(e) {
         // Switch to timetable section and view it
         document.getElementById('ttFilterDept').value = dept;
         document.getElementById('ttFilterYear').value = year;
+        onTtYearChange();
         document.getElementById('ttFilterSem').value = sem;
+        if (document.getElementById('ttFilterSec')) document.getElementById('ttFilterSec').value = sec;
         showBentoSection('timetables');
         loadSelectedTimetable();
     } else {
@@ -275,10 +279,38 @@ async function handleQuickGenerate(e) {
     }
 }
 
+function onQuickYearChange() {
+    const yVal = parseInt(document.getElementById('quickYearSelect')?.value || '1');
+    const s1 = (yVal - 1) * 2 + 1;
+    const s2 = s1 + 1;
+    const semEl = document.getElementById('quickSemSelect');
+    if (semEl) {
+        semEl.innerHTML = `
+            <option value="${s1}" selected>Semester ${s1}</option>
+            <option value="${s2}">Semester ${s2}</option>
+        `;
+    }
+}
+
+function onTtYearChange() {
+    const yVal = parseInt(document.getElementById('ttFilterYear')?.value || '1');
+    const s1 = (yVal - 1) * 2 + 1;
+    const s2 = s1 + 1;
+    const semEl = document.getElementById('ttFilterSem');
+    if (semEl) {
+        semEl.innerHTML = `
+            <option value="${s1}" selected>Semester ${s1}</option>
+            <option value="${s2}">Semester ${s2}</option>
+        `;
+    }
+    loadSelectedTimetable();
+}
+
 async function loadSelectedTimetable() {
     const dept = document.getElementById('ttFilterDept')?.value;
     const year = document.getElementById('ttFilterYear')?.value;
     const sem = document.getElementById('ttFilterSem')?.value;
+    const sec = document.getElementById('ttFilterSec')?.value || 'A';
 
     const display = document.getElementById('adminTimetableDisplay');
     const banner = document.getElementById('timetableStatusBanner');
@@ -290,7 +322,7 @@ async function loadSelectedTimetable() {
 
     display.innerHTML = '<div style="padding: 2.5rem; text-align: center; color: var(--slate-400);">Loading schedule...</div>';
 
-    const res = await apiCall(`/api/timetables?department_id=${dept}&year=${year}&semester=${sem}`);
+    const res = await apiCall(`/api/timetables?department_id=${dept}&year=${year}&semester=${sem}&section=${encodeURIComponent(sec)}`);
     if (!res.success) return;
 
     activeTimetable = res.timetable;
@@ -441,11 +473,13 @@ async function generateCurrentTimetable() {
     const dept = document.getElementById('ttFilterDept')?.value;
     const year = document.getElementById('ttFilterYear')?.value;
     const sem = document.getElementById('ttFilterSem')?.value;
+    const sec = document.getElementById('ttFilterSec')?.value || 'A';
 
     const res = await apiCall('/api/timetables/generate', 'POST', {
         department_id: dept,
         year: year,
-        semester: sem
+        semester: sem,
+        section: sec
     });
 
     if (res.success) {
